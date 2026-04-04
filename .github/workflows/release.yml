@@ -27,14 +27,13 @@ jobs:
     - name: Install dependencies
       run: ${{ matrix.install_deps }}
 
-    - name: Build all
+    - name: Build Conduit
       run: make all
 
     - name: Create tarball
       run: |
         mkdir -p conduit-${{ matrix.platform }}
-        cp conduit conduit-${{ matrix.platform }}/
-        cp socat-repo/socat conduit-${{ matrix.platform }}/socat-stealth
+        cp socat-repo/conduit conduit-${{ matrix.platform }}/
         cp README.md LICENSE conduit-${{ matrix.platform }}/
         tar -czf conduit-${{ matrix.platform }}.tar.gz conduit-${{ matrix.platform }}
 

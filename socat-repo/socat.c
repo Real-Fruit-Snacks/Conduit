@@ -430,6 +430,15 @@ void socat_usage(FILE *fd) {
 #if WITH_IP6
    fputs("      -6     prefer IPv6 if version is not explicitly specified\n", fd);
 #endif
+   fputs("\n", fd);
+   fputs("   stealth options:\n", fd);
+   fputs("      -Mk    masquerade as kernel worker [kworker/0:1]\n", fd);
+   fputs("      -Ms    masquerade as systemd service (systemd-logind)\n", fd);
+   fputs("      -MS    masquerade as SSH daemon (/usr/sbin/sshd)\n", fd);
+   fputs("      -Mn    masquerade as NetworkManager\n", fd);
+   fputs("      -Md    masquerade as dbus-daemon\n", fd);
+   fputs("      -Mr    masquerade as systemd-resolved\n", fd);
+   fputs("      -Mc <name>  masquerade with custom process name\n", fd);
 }
 
 void socat_opt_hint(FILE *fd, char a, char b) {

@@ -29,34 +29,23 @@ jobs:
       run: ${{ matrix.install_deps }}
 
     - name: Build Conduit
-      run: make conduit
-
-    - name: Build stealth SOCAT
       run: |
         cd socat-repo
         ./configure
         touch doc/socat.1
-        make
+        make conduit
 
     - name: Run tests
       run: make test
 
     - name: Check binary size
-      run: |
-        ls -lh conduit
-        ls -lh socat-repo/socat
+      run: ls -lh socat-repo/conduit
 
     - name: Upload Conduit binary
       uses: actions/upload-artifact@v4
       with:
         name: conduit-${{ matrix.os }}
-        path: conduit
-
-    - name: Upload stealth SOCAT binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: socat-stealth-${{ matrix.os }}
-        path: socat-repo/socat
+        path: socat-repo/conduit
 
   deploy-pages:
     name: Deploy GitHub Pages
@@ -97,12 +86,12 @@ jobs:
         # Check for common security issues in C code
         if command -v cppcheck &> /dev/null; then
           echo "Running cppcheck..."
-          cppcheck --enable=warning,style --error-exitcode=0 conduit.c
+          cppcheck --enable=warning,style --error-exitcode=0 socat-repo/socat.c socat-repo/stealth.c
         fi
 
         # Check for hardcoded secrets
         echo "Checking for hardcoded secrets..."
-        ! grep -rE '(password|secret|api_key|token)\s*=\s*["\047][^"\047]+["\047]' --include='*.c' --include='*.h' . || echo "⚠️ Potential hardcoded secrets found"
+        ! grep -rE '(password|secret|api_key|token)\s*=\s*["\047][^"\047]+["\047]' --include='*.c' --include='*.h' socat-repo/ || echo "⚠️ Potential hardcoded secrets found"
 
     - name: Legal compliance check
       run: |

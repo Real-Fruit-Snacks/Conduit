@@ -111,13 +111,18 @@ progs: $(PROGS)
 depend: $(CFILES) $(HFILES)
 	makedepend $(SYSDEFS) $(CFILES)
 
-socat: socat.o libxio.a
+conduit: socat.o libxio.a
 	@if grep -q "^#define STATIC_STEALTH_BUILD" config.h 2>/dev/null; then \
-		echo "Building statically linked stealth socat..."; \
+		echo "Building statically linked Conduit..."; \
 		$(CC) $(CFLAGS) $(LDFLAGS) -static -o $@ socat.o libxio.a $(CLIBS); \
 	else \
+		echo "Building Conduit..."; \
 		$(CC) $(CFLAGS) $(LDFLAGS) -o $@ socat.o libxio.a $(CLIBS); \
 	fi
+
+# Legacy alias for compatibility
+socat: conduit
+	@ln -sf conduit socat
 
 PROCAN_OBJS=procan_main.o procan.o procan-cdefs.o hostan.o error.o sycls.o sysutils.o utils.o vsnprintf_r.o snprinterr.o
 procan: $(PROCAN_OBJS)

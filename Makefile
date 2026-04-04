@@ -7,33 +7,25 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
 # Targets
-CONDUIT = conduit
-SOCAT = socat-repo/socat
+CONDUIT = socat-repo/conduit
 
-.PHONY: all clean install uninstall socat help test
+.PHONY: all clean install uninstall conduit help test
 
-all: $(CONDUIT) socat
+all: conduit
 
-# Build Conduit binary
-$(CONDUIT): conduit.c
+# Build Conduit (integrated SOCAT with stealth + masquerading)
+conduit:
 	@echo "Building Conduit..."
-	$(CC) $(CFLAGS) -o $(CONDUIT) conduit.c
-	@echo "✓ Conduit built successfully"
-
-# Build stealth SOCAT
-socat:
-	@echo "Building stealth SOCAT..."
 	@if [ ! -f socat-repo/Makefile ]; then \
-		echo "Configuring SOCAT..."; \
+		echo "Configuring Conduit..."; \
 		cd socat-repo && ./configure; \
 	fi
-	@cd socat-repo && $(MAKE)
-	@echo "✓ Stealth SOCAT built successfully"
+	@cd socat-repo && $(MAKE) conduit
+	@echo "✓ Conduit built successfully"
 
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -f $(CONDUIT)
 	@if [ -f socat-repo/Makefile ]; then \
 		cd socat-repo && $(MAKE) clean; \
 	fi
@@ -44,24 +36,20 @@ clean:
 install: all
 	@echo "Installing binaries to $(BINDIR)..."
 	install -d $(BINDIR)
-	install -m 755 $(CONDUIT) $(BINDIR)/
-	install -m 755 $(SOCAT) $(BINDIR)/socat-stealth
+	install -m 755 $(CONDUIT) $(BINDIR)/conduit
 	@echo "✓ Installation complete"
 	@echo "  - conduit -> $(BINDIR)/conduit"
-	@echo "  - socat-stealth -> $(BINDIR)/socat-stealth"
 
 # Uninstall binaries
 uninstall:
 	@echo "Uninstalling binaries..."
-	rm -f $(BINDIR)/$(CONDUIT)
-	rm -f $(BINDIR)/socat-stealth
+	rm -f $(BINDIR)/conduit
 	@echo "✓ Uninstall complete"
 
 # Test Conduit binary
-test: $(CONDUIT)
+test: conduit
 	@echo "Testing Conduit binary..."
-	./$(CONDUIT) --help
-	./$(CONDUIT) --list-masq
+	$(CONDUIT) -h | head -5
 	@echo "✓ Basic tests passed"
 
 # Help
@@ -69,12 +57,11 @@ help:
 	@echo "Conduit Build System"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all          - Build all components (default)"
-	@echo "  conduit      - Build only Conduit binary"
-	@echo "  socat        - Build only stealth SOCAT"
+	@echo "  all          - Build Conduit (default)"
+	@echo "  conduit      - Build Conduit binary"
 	@echo "  clean        - Remove build artifacts"
-	@echo "  install      - Install binaries to $(PREFIX)"
-	@echo "  uninstall    - Remove installed binaries"
+	@echo "  install      - Install binary to $(PREFIX)"
+	@echo "  uninstall    - Remove installed binary"
 	@echo "  test         - Run basic tests"
 	@echo "  help         - Show this help message"
 	@echo ""

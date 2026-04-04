@@ -1,6 +1,5 @@
 # Compiled binaries
-conduit
-process-masq
+socat-repo/conduit
 socat-repo/socat
 socat-repo/filan
 socat-repo/procan
