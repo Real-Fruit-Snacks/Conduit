@@ -3,24 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Conduit - Network relay with process masquerading for authorized security operations">
-    <meta name="keywords" content="socat, network relay, security testing, penetration testing, red team, process masquerading">
-    <meta name="author" content="Real-Fruit-Snacks">
-    <title>Conduit - Stealth Network Relay</title>
+    <title>Conduit — SOCAT Network Relay with Process Masquerading</title>
+    <meta name="description" content="Linux/BSD network relay with kernel-level process masquerading. Argument hiding, SOCAT compatibility, multi-platform support.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #1e1e2e;
-            --bg-secondary: #181825;
-            --bg-tertiary: #313244;
-            --text-primary: #cdd6f4;
-            --text-secondary: #bac2de;
-            --text-muted: #a6adc8;
-            --accent-blue: #89b4fa;
-            --accent-teal: #94e2d5;
-            --accent-green: #a6e3a1;
-            --accent-red: #f38ba8;
-            --accent-yellow: #f9e2af;
-            --border: #45475a;
+            --red: #f38ba8;
+            --maroon: #eba0ac;
+            --pink: #f5c2e7;
+            --mauve: #cba6f7;
+            --blue: #89b4fa;
+            --sapphire: #74c7ec;
+            --sky: #89dceb;
+            --teal: #94e2d5;
+            --green: #a6e3a1;
+            --yellow: #f9e2af;
+            --peach: #fab387;
+            --text: #cdd6f4;
+            --subtext1: #bac2de;
+            --subtext0: #a6adc8;
+            --overlay2: #9399b2;
+            --overlay1: #7f849c;
+            --overlay0: #6c7086;
+            --surface2: #585b70;
+            --surface1: #45475a;
+            --surface0: #313244;
+            --base: #1e1e2e;
+            --mantle: #181825;
+            --crust: #11111b;
         }
 
         * {
@@ -30,487 +42,928 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--base);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        header {
-            text-align: center;
-            padding: 4rem 0 2rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .logo {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            color: var(--accent-teal);
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .tagline {
-            font-size: 1.3rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .badges {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-
-        .badge {
-            padding: 0.4rem 0.8rem;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .warning-box {
-            background: rgba(243, 139, 168, 0.1);
-            border: 2px solid var(--accent-red);
-            border-radius: 8px;
-            padding: 2rem;
-            margin: 2rem 0;
-            text-align: center;
-        }
-
-        .warning-box h2 {
-            color: var(--accent-red);
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .warning-box p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: var(--text-primary);
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--accent-blue);
-            color: var(--bg-primary);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-teal);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--accent-teal);
-            border: 2px solid var(--accent-teal);
-        }
-
-        .btn-secondary:hover {
-            background: var(--accent-teal);
-            color: var(--bg-primary);
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        .feature-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            color: var(--accent-teal);
-            font-size: 1.4rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .code-block {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            overflow-x: auto;
-        }
-
-        .code-block pre {
-            color: var(--accent-green);
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .code-block code {
-            color: var(--text-primary);
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 2rem;
-            margin: 3rem 0;
-            padding: 2rem;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .water-flow {
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-teal) 100%);
-            z-index: 1000;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, var(--overlay0) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: -1;
         }
 
-        footer {
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.5;
+        }
+
+        ::selection {
+            background: rgba(243, 139, 168, 0.3);
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header/Hero */
+        .hero {
+            padding: 80px 0 60px;
             text-align: center;
-            padding: 3rem 0 2rem;
-            margin-top: 4rem;
-            border-top: 2px solid var(--border);
-            color: var(--text-muted);
         }
 
-        .toolkit-list {
+        .hero h1 {
+            font-size: clamp(42px, 7vw, 72px);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .tagline {
+            font-size: clamp(16px, 2.5vw, 20px);
+            color: var(--subtext1);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .hero .warning {
+            background: rgba(243, 139, 168, 0.1);
+            border: 1px solid var(--red);
+            border-radius: 4px;
+            padding: 16px 24px;
+            margin: 32px auto;
+            max-width: 800px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hero .warning strong {
+            color: var(--red);
+        }
+
+        /* Stats Grid */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 48px 0;
+        }
+
+        .stat {
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--blue);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--subtext0);
+            margin-top: 8px;
+        }
+
+        /* CTAs */
+        .cta-group {
             display: flex;
-            gap: 1rem;
+            gap: 16px;
             justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 1rem;
+            margin-top: 32px;
         }
 
-        .toolkit-item {
-            color: var(--accent-blue);
+        .btn {
+            padding: 12px 28px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
-            transition: color 0.3s ease;
+            letter-spacing: 0.02em;
+            transition: all 0.2s;
+            display: inline-block;
         }
 
-        .toolkit-item:hover {
-            color: var(--accent-teal);
+        .btn-primary {
+            background: var(--red);
+            color: var(--crust);
+            border: none;
         }
 
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
+        .btn-primary:hover {
+            background: var(--maroon);
+            box-shadow: 0 0 20px rgba(243, 139, 168, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--surface1);
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface0);
+            border-color: var(--surface2);
+        }
+
+        /* Terminal Component */
+        .terminal {
+            background: var(--mantle);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.3),
+                0 0 0 1px var(--surface0);
+        }
+
+        .terminal-titlebar {
+            background: var(--crust);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--surface1);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot:nth-child(1) { background: var(--red); }
+        .terminal-dot:nth-child(2) { background: var(--yellow); }
+        .terminal-dot:nth-child(3) { background: var(--green); }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: var(--subtext0);
+        }
+
+        .terminal-content {
+            padding: 28px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .terminal-content pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .terminal-content .prompt {
+            color: var(--green);
+        }
+
+        .terminal-content .comment {
+            color: var(--overlay0);
+        }
+
+        .terminal-content .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--text);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Sections */
+        section {
+            padding: 60px 0;
+        }
+
+        section h2 {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        section .section-desc {
+            font-size: 15px;
+            color: var(--subtext0);
+            margin-bottom: 40px;
+            max-width: 700px;
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .feature {
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-top: 3px solid var(--blue);
+            border-radius: 4px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+
+        .feature:hover {
+            transform: translateY(-2px);
+            border-top-color: var(--teal);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature h3 {
+            font-size: 18px;
+            color: var(--teal);
+            margin-bottom: 12px;
+        }
+
+        .feature p {
+            font-size: 14px;
+            color: var(--subtext1);
+            line-height: 1.6;
+        }
+
+        /* Capabilities Pills */
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .capability {
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .capability:hover {
+            border-color: var(--surface2);
+            background: var(--surface1);
+        }
+
+        .capability-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .capability-indicator.limited {
+            background: var(--yellow);
+        }
+
+        .capability-indicator.none {
+            background: var(--red);
+        }
+
+        /* Architecture Grid */
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .arch-item {
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 28px;
+        }
+
+        .arch-item .number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: var(--blue);
+            color: var(--crust);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .arch-item h3 {
+            font-size: 18px;
+            color: var(--teal);
+            margin-bottom: 12px;
+        }
+
+        .arch-item p {
+            font-size: 14px;
+            color: var(--subtext1);
+            line-height: 1.6;
+        }
+
+        .arch-item code {
+            background: var(--mantle);
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 13px;
+            color: var(--green);
+        }
+
+        /* Two-Column Layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--surface1);
+            padding: 40px 0;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 32px;
+        }
+
+        .footer-section h4 {
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--blue);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--sapphire);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--surface1);
+            font-size: 13px;
+            color: var(--subtext0);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .tagline {
-                font-size: 1.1rem;
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .architecture-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .hero {
+                padding: 60px 0 40px;
+            }
+
+            section {
+                padding: 40px 0;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .terminal-content {
+                padding: 20px;
+                font-size: 13px;
             }
 
             .features {
                 grid-template-columns: 1fr;
             }
 
-            .cta-buttons {
+            .footer-content {
                 flex-direction: column;
             }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
         }
 
-        .highlight {
-            color: var(--accent-teal);
-            font-weight: 600;
-        }
-
-        .legal-section {
-            background: var(--bg-tertiary);
-            border-left: 4px solid var(--accent-yellow);
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-radius: 4px;
-        }
-
-        .legal-section h3 {
-            color: var(--accent-yellow);
-            margin-bottom: 1rem;
-        }
-
-        .check-list {
-            list-style: none;
-            margin: 1rem 0;
-        }
-
-        .check-list li {
-            padding: 0.5rem 0;
-            padding-left: 1.5rem;
-            position: relative;
-        }
-
-        .check-list li:before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--accent-green);
-            font-weight: bold;
-        }
-
-        .check-list li.no:before {
-            content: '✗';
-            color: var(--accent-red);
+        a:focus-visible {
+            outline: 2px solid var(--red);
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="water-flow"></div>
-
-    <div class="container">
-        <header>
-            <div class="logo">🌊</div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
             <h1>Conduit</h1>
-            <p class="tagline">Network relay with process masquerading for authorized security operations</p>
-
-            <div class="badges">
-                <span class="badge">GPLv2 License</span>
-                <span class="badge">Linux | BSD | macOS</span>
-                <span class="badge">C Language</span>
-                <span class="badge">Based on SOCAT 1.7.3.3</span>
-            </div>
-
-            <div class="cta-buttons">
-                <a href="https://github.com/Real-Fruit-Snacks/Conduit" class="btn btn-primary">
-                    📦 View on GitHub
-                </a>
-                <a href="https://github.com/Real-Fruit-Snacks/Conduit#installation" class="btn btn-secondary">
-                    📖 Documentation
-                </a>
-            </div>
-        </header>
-
-        <section class="warning-box">
-            <h2>⚠️ AUTHORIZED USE ONLY</h2>
-            <p>
-                This tool is designed <strong>exclusively</strong> for authorized security testing with explicit written permission.
-                Unauthorized access to computer systems is <strong>illegal</strong> and may result in criminal prosecution.
+            <p class="tagline">SOCAT-based network relay with kernel-level process masquerading</p>
+            <p style="color: var(--subtext1); font-size: 14px; max-width: 700px; margin: 0 auto;">
+                Process name manipulation via prctl/setproctitle. Argument memory zeroing across /proc boundaries. 
+                Full bidirectional relay with 50+ channel types. Zero configuration stealth.
             </p>
-            <ul class="check-list" style="text-align: left; max-width: 600px; margin: 1.5rem auto;">
-                <li>Authorized penetration testing and red team operations</li>
-                <li>Security research in controlled environments</li>
-                <li>CTF competitions and defensive security training</li>
-                <li class="no">Unauthorized access or malicious purposes</li>
-            </ul>
-        </section>
 
-        <section>
-            <h2 style="text-align: center; margin: 3rem 0 2rem; font-size: 2rem; color: var(--accent-blue);">Features</h2>
+            <div class="warning">
+                <strong>⚠️ Authorization Required:</strong> This tool is designed exclusively for authorized security testing with explicit written permission. 
+                Unauthorized access to computer systems is illegal and may result in criminal prosecution.
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">100+</div>
+                    <div class="stat-label">SOCAT Options</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">50+</div>
+                    <div class="stat-label">Channel Types</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Platforms</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">Masquerade Presets</div>
+                </div>
+            </div>
+
+            <div class="cta-group">
+                <a href="https://github.com/Real-Fruit-Snacks/Conduit" class="btn btn-primary">
+                    View on GitHub
+                </a>
+                <a href="https://github.com/Real-Fruit-Snacks/Conduit#quick-start" class="btn btn-ghost">
+                    Documentation
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section>
+        <div class="container">
+            <h2>Features</h2>
+            <p class="section-desc">
+                Platform-native process manipulation with complete SOCAT functionality. Zero overhead. Multi-platform support.
+            </p>
 
             <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Argument Hiding</h3>
-                    <p>
-                        Command-line arguments automatically hidden from process inspection tools
-                        (<code>ps</code>, <code>top</code>, <code>htop</code>, <code>/proc/cmdline</code>).
-                        Zero configuration required.
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🎭</div>
+                <div class="feature">
                     <h3>Process Masquerading</h3>
-                    <p>
-                        Appear as legitimate system processes: kernel workers, systemd services,
-                        SSH daemons, or custom names. Multiple preset identities included.
-                    </p>
+                    <p>Linux prctl() for kernel workers. BSD setproctitle() for system services. Generic argv[] manipulation fallback.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>Full SOCAT Power</h3>
-                    <p>
-                        All original SOCAT capabilities: TCP, UDP, UNIX sockets, SSL/TLS, SOCKS,
-                        HTTP CONNECT, and 50+ data channel types with 100+ configuration options.
-                    </p>
+                <div class="feature">
+                    <h3>Argument Hiding</h3>
+                    <p>Command-line arguments erased from /proc filesystem. Memory boundaries overwritten post-parse. Microsecond overhead.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">💻</div>
-                    <h3>Cross-Platform</h3>
-                    <p>
-                        Native support for Linux (prctl), BSD (setproctitle), and macOS.
-                        Generic fallback for other Unix-like systems. Tested on multiple distributions.
-                    </p>
+                <div class="feature">
+                    <h3>Full SOCAT Compatibility</h3>
+                    <p>100+ configuration options preserved. TCP/UDP/UNIX/SSL/TLS support. No functionality sacrificed for stealth.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">📦</div>
-                    <h3>Multiple Deployments</h3>
-                    <p>
-                        Choose your deployment: unified Conduit binary with presets,
-                        standalone wrapper, or modified SOCAT with integrated stealth library.
-                    </p>
+                <div class="feature">
+                    <h3>Multi-Platform</h3>
+                    <p>Native Linux (prctl). BSD family (setproctitle). macOS partial. Solaris/AIX generic fallback.</p>
                 </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Zero Overhead</h3>
-                    <p>
-                        Minimal performance impact. Stealth features activate in microseconds.
-                        No changes to SOCAT's core relay logic or data flow.
-                    </p>
+                <div class="feature">
+                    <h3>Zero Configuration</h3>
+                    <p>Stealth activates automatically. No config files. No environment variables. Single binary deployment.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>Deployment Flexibility</h3>
+                    <p>Unified Conduit binary with presets. Standalone wrapper. Modified SOCAT with integrated library.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>Detection Awareness</h3>
+                    <p>Documented evasion boundaries. Known EDR/XDR limitations. Network traffic visibility. Kernel security considerations.</p>
+                </div>
+
+                <div class="feature">
+                    <h3>Operational Security</h3>
+                    <p>Legal compliance emphasis. Defender detection methods documented. Authorization framework. Incident response procedures.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section>
-            <h2 style="text-align: center; margin: 3rem 0 2rem; font-size: 2rem; color: var(--accent-blue);">Quick Start</h2>
-
-            <div class="code-block">
-                <pre><code><span style="color: var(--text-muted);"># Clone repository</span>
-<span style="color: var(--accent-green);">git clone</span> https://github.com/Real-Fruit-Snacks/Conduit.git
-<span style="color: var(--accent-green);">cd</span> Conduit
-
-<span style="color: var(--text-muted);"># Build all components</span>
-<span style="color: var(--accent-green);">make</span>
-
-<span style="color: var(--text-muted);"># Test installation</span>
-<span style="color: var(--accent-green);">make test</span>
-
-<span style="color: var(--text-muted);"># Masquerade as kernel worker</span>
-<span style="color: var(--accent-green);">./conduit</span> --masq-kernel TCP-LISTEN:8080,fork TCP:10.0.0.5:80
-
-<span style="color: var(--text-muted);"># List available masquerade options</span>
-<span style="color: var(--accent-green);">./conduit</span> --list-masq</code></pre>
-            </div>
-        </section>
-
-        <section class="stats">
-            <div class="stat">
-                <div class="stat-value">100+</div>
-                <div class="stat-label">SOCAT Options</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">50+</div>
-                <div class="stat-label">Data Channel Types</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">3</div>
-                <div class="stat-label">Deployment Methods</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">6</div>
-                <div class="stat-label">Masquerade Presets</div>
-            </div>
-        </section>
-
-        <section class="legal-section">
-            <h3>License & Legal</h3>
-            <p>
-                <strong>License:</strong> GNU General Public License version 2 (GPLv2) with OpenSSL linking exception<br>
-                <strong>Copyright:</strong> Conduit modifications © 2026 Real-Fruit-Snacks<br>
-                <strong>Based on:</strong> SOCAT 1.7.3.3 © 2001-2023 Gerhard Rieger and contributors
+    <!-- Capabilities Section -->
+    <section style="background: var(--mantle);">
+        <div class="container">
+            <h2>Platform Capabilities</h2>
+            <p class="section-desc">
+                Native implementations for major platforms. Graceful degradation on unsupported systems.
             </p>
-            <p style="margin-top: 1rem;">
-                This software is provided "AS IS" without warranty. User is solely responsible for
-                compliance with applicable laws. See the
-                <a href="https://github.com/Real-Fruit-Snacks/Conduit/blob/main/LICENSE"
-                   style="color: var(--accent-teal);">LICENSE</a> file for complete terms.
-            </p>
-        </section>
 
-        <footer>
-            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
-                <strong style="color: var(--accent-blue);">Part of the Real-Fruit-Snacks water-themed security toolkit</strong>
-            </p>
-            <div class="toolkit-list">
-                <a href="https://github.com/Real-Fruit-Snacks/Tidepool" class="toolkit-item">Tidepool</a>
-                <span style="color: var(--border);">•</span>
-                <a href="https://github.com/Real-Fruit-Snacks/Riptide" class="toolkit-item">Riptide</a>
-                <span style="color: var(--border);">•</span>
-                <a href="https://github.com/Real-Fruit-Snacks/Cascade" class="toolkit-item">Cascade</a>
-                <span style="color: var(--border);">•</span>
-                <a href="https://github.com/Real-Fruit-Snacks/Slipstream" class="toolkit-item">Slipstream</a>
-                <span style="color: var(--border);">•</span>
-                <a href="https://github.com/Real-Fruit-Snacks/HydroShot" class="toolkit-item">HydroShot</a>
-                <span style="color: var(--border);">•</span>
-                <span class="highlight">Conduit</span>
+            <div class="capabilities">
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>Linux prctl</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>FreeBSD</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>OpenBSD</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator limited"></span>
+                    <span>macOS</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>TCP/UDP</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>UNIX Sockets</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>SSL/TLS</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>SOCKS Proxy</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>Argument Hiding</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator"></span>
+                    <span>Process Masq</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator none"></span>
+                    <span>EDR Evasion</span>
+                </div>
+                <div class="capability">
+                    <span class="capability-indicator none"></span>
+                    <span>Traffic Hiding</span>
+                </div>
             </div>
-            <p style="margin-top: 2rem; font-size: 0.9rem;">
-                Remember: With great power comes great responsibility. 🌊
+
+            <div style="margin-top: 24px; font-size: 13px; color: var(--subtext0);">
+                <span style="color: var(--green);">●</span> Full Support &nbsp;&nbsp;
+                <span style="color: var(--yellow);">●</span> Limited &nbsp;&nbsp;
+                <span style="color: var(--red);">●</span> Not Supported
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section>
+        <div class="container">
+            <h2>Architecture</h2>
+            <p class="section-desc">
+                Three-layer design: Conduit CLI, process wrapper, and modified SOCAT with integrated stealth library.
             </p>
-        </footer>
-    </div>
+
+            <div class="architecture-grid">
+                <div class="arch-item">
+                    <span class="number">1</span>
+                    <h3>Initialization</h3>
+                    <p>Parse arguments and validate options. Detect platform capabilities. Select appropriate stealth method (<code>prctl</code>, <code>setproctitle</code>, or fallback).</p>
+                </div>
+
+                <div class="arch-item">
+                    <span class="number">2</span>
+                    <h3>Argument Hiding</h3>
+                    <p>Zero command-line arguments from memory. Overwrite <code>/proc/self/cmdline</code>. Clear argv[] boundaries. Microsecond execution time.</p>
+                </div>
+
+                <div class="arch-item">
+                    <span class="number">3</span>
+                    <h3>Process Masquerading</h3>
+                    <p>Set process name via platform API. Update <code>ps</code> output. Maintain masquerade throughout execution. Support preset and custom identities.</p>
+                </div>
+
+                <div class="arch-item">
+                    <span class="number">4</span>
+                    <h3>SOCAT Relay</h3>
+                    <p>Execute full bidirectional relay. Maintain all SOCAT features. No performance degradation. Transparent stealth layer.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section style="background: var(--mantle);">
+        <div class="container">
+            <h2>Getting Started</h2>
+            <p class="section-desc">
+                Build from source and deploy. Multi-platform support with native optimizations.
+            </p>
+
+            <div class="two-col">
+                <div class="terminal">
+                    <div class="terminal-titlebar">
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-title">bash</span>
+                    </div>
+                    <div class="terminal-content">
+                        <pre><span class="prompt">$ </span><span class="comment"># Clone repository</span>
+git clone https://github.com/Real-Fruit-Snacks/Conduit.git
+cd Conduit
+
+<span class="prompt">$ </span><span class="comment"># Build all components</span>
+make
+
+<span class="prompt">$ </span><span class="comment"># Test installation</span>
+make test
+
+<span class="prompt">$ </span><span class="comment"># Verify masquerade options</span>
+./conduit --list-masq<span class="cursor"></span></pre>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 18px; color: var(--teal); margin-bottom: 16px;">Prerequisites</h3>
+                    <ul style="font-size: 14px; color: var(--subtext1); line-height: 2; list-style-position: inside;">
+                        <li>GCC or compatible C compiler</li>
+                        <li>GNU Make for build system</li>
+                        <li>OpenSSL (optional, for SSL/TLS)</li>
+                        <li>GNU Readline (optional, for interactive features)</li>
+                    </ul>
+
+                    <h3 style="font-size: 18px; color: var(--teal); margin: 24px 0 16px;">Platform Support</h3>
+                    <ul style="font-size: 14px; color: var(--subtext1); line-height: 2; list-style-position: inside;">
+                        <li>Linux (Ubuntu, Debian, RHEL, Alpine)</li>
+                        <li>FreeBSD, OpenBSD, NetBSD</li>
+                        <li>macOS (limited masquerading)</li>
+                        <li>Solaris, AIX (generic fallback)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Examples Section -->
+    <section>
+        <div class="container">
+            <h2>Usage Examples</h2>
+            <p class="section-desc">
+                Multiple deployment patterns for different operational scenarios.
+            </p>
+
+            <div class="two-col">
+                <div class="terminal">
+                    <div class="terminal-titlebar">
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-title">kernel-worker.sh</span>
+                    </div>
+                    <div class="terminal-content">
+                        <pre><span class="comment"># Masquerade as kernel worker</span>
+./conduit --masq-kernel \
+  TCP-LISTEN:8080,fork \
+  TCP:backend:80
+
+<span class="comment"># Process appears as [kworker/0:1]</span>
+<span class="comment"># Arguments hidden from ps/top</span></pre>
+                    </div>
+                </div>
+
+                <div class="terminal">
+                    <div class="terminal-titlebar">
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-title">ssl-tunnel.sh</span>
+                    </div>
+                    <div class="terminal-content">
+                        <pre><span class="comment"># Encrypted relay with masquerade</span>
+./conduit --masq-systemd \
+  TCP-LISTEN:443,cert=server.pem \
+  TCP:internal-service:8080
+
+<span class="comment"># Appears as systemd-logind</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-col" style="margin-top: 24px;">
+                <div class="terminal">
+                    <div class="terminal-titlebar">
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-title">unix-socket.sh</span>
+                    </div>
+                    <div class="terminal-content">
+                        <pre><span class="comment"># UNIX socket to TCP bridge</span>
+./conduit --masq '[nginx]' \
+  UNIX-LISTEN:/tmp/control.sock \
+  TCP:192.168.1.100:9000
+
+<span class="comment"># Custom masquerade name</span></pre>
+                    </div>
+                </div>
+
+                <div class="terminal">
+                    <div class="terminal-titlebar">
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-title">socks-proxy.sh</span>
+                    </div>
+                    <div class="terminal-content">
+                        <pre><span class="comment"># SOCKS proxy with masquerade</span>
+./conduit --masq-random \
+  TCP-LISTEN:1080,fork \
+  SOCKS4A:proxy:target:80
+
+<span class="comment"># Random system process identity</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Notice Section -->
+    <section style="background: var(--mantle);">
+        <div class="container">
+            <h2>Security & Legal</h2>
+            <p class="section-desc">
+                Designed for authorized testing. Legal compliance required. Detection limitations documented.
+            </p>
+
+            <div style="background: var(--surface0); border-left: 4px solid var(--yellow); padding: 28px; border-radius: 4px; margin-top: 32px;">
+                <h3 style="font-size: 18px; color: var(--yellow); margin-bottom: 16px;">⚠️ Authorization Required</h3>
+                <p style="font-size: 14px; color: var(--subtext1); line-height: 1.8; margin-bottom: 16px;">
+                    Conduit must only be used with explicit written authorization from system owners. Unauthorized access 
+                    to computer systems violates laws in most jurisdictions including:
+                </p>
+                <ul style="font-size: 14px; color: var(--subtext1); line-height: 2; margin-left: 20px;">
+                    <li>Computer Fraud and Abuse Act (CFAA) — United States</li>
+                    <li>Computer Misuse Act — United Kingdom</li>
+                    <li>Various national laws — European Union</li>
+                </ul>
+                <p style="font-size: 14px; color: var(--subtext1); line-height: 1.8; margin-top: 16px;">
+                    <strong>User is solely responsible for legal compliance.</strong> Violations may result in criminal prosecution, 
+                    civil liability, and significant penalties.
+                </p>
+            </div>
+
+            <div style="background: var(--surface0); border-left: 4px solid var(--red); padding: 28px; border-radius: 4px; margin-top: 24px;">
+                <h3 style="font-size: 18px; color: var(--red); margin-bottom: 16px;">Known Limitations</h3>
+                <p style="font-size: 14px; color: var(--subtext1); line-height: 1.8;">
+                    Conduit does <strong>NOT</strong> protect against:
+                </p>
+                <ul style="font-size: 14px; color: var(--subtext1); line-height: 2; margin: 12px 0 0 20px;">
+                    <li>System call tracing (strace, dtrace, eBPF)</li>
+                    <li>Network traffic analysis</li>
+                    <li>EDR/XDR behavioral monitoring</li>
+                    <li>Kernel security modules (SELinux, AppArmor)</li>
+                    <li>Memory forensics investigation</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit#quick-start">Quick Start</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit#architecture">Architecture</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit/blob/main/INSTALL.md">Installation Guide</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit/blob/main/SECURITY.md">Security Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="http://www.dest-unreach.org/socat/">Original SOCAT</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit/blob/main/CONTRIBUTING.md">Contributing</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit/blob/main/CHANGELOG.md">Changelog</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Conduit/issues">Report Issues</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Water-Themed Toolkit</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Tidepool">Tidepool</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Riptide">Riptide</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Cascade">Cascade</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Slipstream">Slipstream</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/HydroShot">HydroShot</a></li>
+                        <li><a href="https://github.com/Real-Fruit-Snacks/Aquifer">Aquifer</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>License</h4>
+                    <p style="font-size: 13px; color: var(--subtext1); line-height: 1.7;">
+                        GPLv2 with OpenSSL exception<br>
+                        Copyright © 2026 Real-Fruit-Snacks<br>
+                        Based on SOCAT 1.7.3.3
+                    </p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>Part of the Real-Fruit-Snacks security toolkit 🌊</p>
+                <p style="margin-top: 8px;">Remember: With great power comes great responsibility.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

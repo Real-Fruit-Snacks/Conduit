@@ -1,112 +1,101 @@
-# Conduit
-
 <div align="center">
 
-![License](https://img.shields.io/badge/license-GPLv2-blue.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Real-Fruit-Snacks/Conduit/main/docs/assets/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Real-Fruit-Snacks/Conduit/main/docs/assets/logo-light.svg">
+  <img alt="Conduit" src="https://raw.githubusercontent.com/Real-Fruit-Snacks/Conduit/main/docs/assets/logo-dark.svg" width="400">
+</picture>
+
+![C](https://img.shields.io/badge/language-C-orange.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20BSD%20%7C%20macOS-lightgrey)
-![C](https://img.shields.io/badge/language-C-orange)
-![SOCAT](https://img.shields.io/badge/based%20on-SOCAT%201.7.3.3-green)
+![License](https://img.shields.io/badge/license-GPLv2-blue.svg)
 
-**Network relay with process masquerading for authorized security operations**
+**SOCAT-based network relay with kernel-level process masquerading**
 
-A derivative of [SOCAT](http://www.dest-unreach.org/socat/) with built-in stealth capabilities: automatic argument hiding and process masquerading designed for operational security in authorized penetration testing, red team operations, and security research.
+Process name manipulation via prctl/setproctitle. Argument memory zeroing across /proc boundaries. Full bidirectional relay with 50+ channel types. Zero configuration stealth.
 
-[Features](#features) •
-[Installation](#installation) •
-[Usage](#usage) •
-[Architecture](#architecture) •
-[Legal Notice](#legal-notice)
+> **Authorization Required**: This tool is designed exclusively for authorized security testing with explicit written permission. Unauthorized access to computer systems is illegal and may result in criminal prosecution.
+
+[Quick Start](#quick-start) • [Architecture](#architecture) • [Stealth Modules](#stealth-modules) • [Security](#security)
 
 </div>
 
 ---
 
-## ⚠️ AUTHORIZED USE ONLY
+## Highlights
 
-**This tool is designed exclusively for authorized security testing.**
+<markdown-accessiblity-table><table>
+<tr>
+<td width="50%">
 
-- ✅ Use with explicit written authorization from system owners
-- ✅ Authorized penetration testing and red team operations
-- ✅ Security research in controlled environments
-- ✅ CTF competitions and defensive security training
-- ❌ Unauthorized access to computer systems is illegal
-- ❌ Not intended for malicious purposes
+**Process Masquerading**  
+Platform-native APIs transform process identity. Linux prctl() for kernel workers. BSD setproctitle() for system services. Generic argv[] memory manipulation fallback.
 
-**User is solely responsible for legal compliance. Unauthorized use may result in criminal prosecution.**
+**Argument Hiding**  
+Command-line arguments erased from /proc filesystem. Memory boundaries overwritten post-parse. Survives ps, top, htop inspection. Microsecond overhead.
 
----
+**Full SOCAT Compatibility**  
+100+ configuration options preserved. 50+ data channel types. TCP/UDP/UNIX/SSL/TLS/SOCKS support. No functionality sacrificed for stealth.
 
-## Features
+**Multi-Platform**  
+Native Linux implementation (prctl). BSD family support (setproctitle). macOS partial compatibility. Solaris/AIX generic fallback.
 
-### 🔒 Stealth Capabilities
+</td>
+<td width="50%">
 
-| Feature | Description |
-|---------|-------------|
-| **Argument Hiding** | Command-line arguments hidden from \`ps\`, \`top\`, \`htop\`, \`/proc/cmdline\` |
-| **Process Masquerading** | Appear as legitimate system processes (kernel workers, system services) |
-| **Platform Support** | Linux (prctl), BSD (setproctitle), generic fallback |
-| **Zero Configuration** | Stealth features activate automatically |
+**Zero Configuration**  
+Stealth activates automatically. No config files required. No environment variables. Single binary deployment.
 
-### 🎭 Masquerading Options
+**Deployment Flexibility**  
+Unified Conduit binary with presets. Standalone process wrapper. Modified SOCAT with integrated library. Choose deployment model per operation.
 
-| Preset | Process Name | Use Case |
-|--------|--------------|----------|
-| \`--masq-kernel\` | \`[kworker/0:1]\` | Kernel worker thread |
-| \`--masq-systemd\` | \`systemd-logind\` | System service |
-| \`--masq-ssh\` | \`/usr/sbin/sshd\` | SSH daemon |
-| \`--masq-random\` | (random) | Random system process |
-| \`--masq '<name>'\` | Custom | User-defined name |
-| \`--no-masq\` | \`socat\` | Argument hiding only |
+**Detection Awareness**  
+Documented evasion boundaries. Known EDR/XDR limitations. Network traffic remains visible. Kernel security module considerations.
 
-### 🌊 Full SOCAT Capabilities
+**Operational Security**  
+Legal compliance emphasis. Defender detection methods documented. Authorization requirement framework. Incident response procedures.
 
-- **Bidirectional relay** between independent data channels
-- **Protocol support**: TCP, UDP, SCTP, UNIX sockets, SSL/TLS, SOCKS, HTTP CONNECT
-- **Data channels**: Files, pipes, PTYs, raw IP, TUN/TAP interfaces
-- **Advanced options**: 100+ configuration parameters for fine-grained control
-- **Cross-platform**: Linux, BSD, macOS, Solaris, AIX, HP-UX
-
-### 📦 Deployment Options
-
-\`\`\`
-┌─────────────────────────────────────────────────────────┐
-│                  Deployment Options                     │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  1. Stealth SOCAT Binary                               │
-│     └─ Modified SOCAT with integrated stealth lib      │
-│        • Automatic argument hiding                      │
-│        • Full SOCAT compatibility                       │
-│                                                         │
-│  2. Process Masquerading Wrapper                       │
-│     └─ Standalone wrapper for stealth SOCAT            │
-│        • Launch with masqueraded process name           │
-│        • Random or preset identities                    │
-│                                                         │
-│  3. Conduit Binary (Recommended)                       │
-│     └─ Unified executable with built-in options        │
-│        • --masq-* presets for quick deployment         │
-│        • Single binary distribution                     │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-\`\`\`
+</td>
+</tr>
+</table></markdown-accessiblity-table>
 
 ---
 
-## Installation
+## Quick Start
 
 ### Prerequisites
 
-| Requirement | Version | Purpose |
-|-------------|---------|---------|
-| **GCC** | Any | C compiler |
-| **GNU Make** | Any | Build system |
-| **OpenSSL** | Optional | SSL/TLS support |
-| **GNU Readline** | Optional | Interactive features |
+<markdown-accessiblity-table><table>
+<tr>
+<th>Requirement</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>GCC</td>
+<td>Any</td>
+<td>C compiler</td>
+</tr>
+<tr>
+<td>GNU Make</td>
+<td>Any</td>
+<td>Build system</td>
+</tr>
+<tr>
+<td>OpenSSL</td>
+<td>Optional</td>
+<td>SSL/TLS channels</td>
+</tr>
+<tr>
+<td>GNU Readline</td>
+<td>Optional</td>
+<td>Interactive features</td>
+</tr>
+</table></markdown-accessiblity-table>
 
-### Quick Start
+### Build
 
-\`\`\`bash
+```bash
 # Clone repository
 git clone https://github.com/Real-Fruit-Snacks/Conduit.git
 cd Conduit
@@ -114,436 +103,585 @@ cd Conduit
 # Build all components
 make
 
-# Test installation
+# Verify build
 make test
-\`\`\`
+./conduit --help
+./conduit --list-masq
+```
 
-### Build Individual Components
+### Verification
 
-\`\`\`bash
-# Build Conduit binary only
-make conduit
+```bash
+# Test argument hiding
+./conduit --masq-kernel TCP-LISTEN:8080,fork TCP:10.0.0.5:80 &
+ps aux | grep conduit    # Arguments hidden
+ps aux | grep kworker    # Appears as kernel worker
 
-# Build stealth SOCAT only
-make socat
+# Test masquerade options
+./conduit --list-masq
 
-# Build process-masq wrapper only
-make process-masq
-\`\`\`
-
-### Platform-Specific Instructions
-
-<details>
-<summary><b>Debian/Ubuntu</b></summary>
-
-\`\`\`bash
-# Install dependencies
-sudo apt-get install build-essential libssl-dev libreadline-dev
-
-# Build
-make
-\`\`\`
-</details>
-
-<details>
-<summary><b>RHEL/CentOS/Fedora</b></summary>
-
-\`\`\`bash
-# Install dependencies
-sudo dnf install gcc make openssl-devel readline-devel
-
-# Build
-make
-\`\`\`
-</details>
-
-<details>
-<summary><b>macOS</b></summary>
-
-\`\`\`bash
-# Install dependencies (Homebrew)
-brew install gcc make openssl readline
-
-# Build
-make
-\`\`\`
-</details>
-
-<details>
-<summary><b>FreeBSD/OpenBSD</b></summary>
-
-\`\`\`bash
-# Install dependencies (FreeBSD)
-pkg install gmake gcc
-
-# Build using GNU Make
-gmake
-\`\`\`
-</details>
-
-### System Installation
-
-\`\`\`bash
-# Install to /usr/local/bin (requires sudo)
-sudo make install
-
-# Install to custom location
-sudo make install PREFIX=/opt/conduit
-
-# Uninstall
-sudo make uninstall
-\`\`\`
+# Clean up
+killall conduit
+```
 
 ---
 
-## Usage
+## Execution Flow
+
+### Stage 1: Initialization
+1. **Parse arguments** — SOCAT command-line processing unchanged
+2. **Validate options** — Check masquerade preset or custom name
+3. **Platform detection** — Identify prctl/setproctitle availability
+
+### Stage 2: Argument Hiding
+```c
+// After argument parsing in main():
+stealth_hide_arguments(argc, argv);
+
+// Platform-specific implementation:
+#ifdef __linux__
+    prctl(PR_SET_NAME, process_name, 0, 0, 0);
+    memset(argv[0], 0, strlen(argv[0]));
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
+    setproctitle("%s", process_name);
+#else
+    // Generic fallback: zero argv memory
+    for (int i = 1; i < argc; i++) {
+        memset(argv[i], 0, strlen(argv[i]));
+    }
+#endif
+```
+
+### Stage 3: SOCAT Execution
+- Stealth layer transparent to relay logic
+- All SOCAT features operational
+- No performance degradation
+- Bidirectional data flow maintained
+
+---
+
+## Components
 
 ### Conduit Binary
 
-\`\`\`bash
+**Primary deployment method**. Unified executable with built-in masquerade presets.
+
+<markdown-accessiblity-table><table>
+<tr>
+<th>Option</th>
+<th>Process Name</th>
+<th>Use Case</th>
+</tr>
+<tr>
+<td><code>--masq-kernel</code></td>
+<td><code>[kworker/0:1]</code></td>
+<td>Kernel worker thread</td>
+</tr>
+<tr>
+<td><code>--masq-systemd</code></td>
+<td><code>systemd-logind</code></td>
+<td>System service daemon</td>
+</tr>
+<tr>
+<td><code>--masq-ssh</code></td>
+<td><code>/usr/sbin/sshd</code></td>
+<td>SSH server process</td>
+</tr>
+<tr>
+<td><code>--masq-random</code></td>
+<td>(random selection)</td>
+<td>Randomized system process</td>
+</tr>
+<tr>
+<td><code>--masq '&lt;name&gt;'</code></td>
+<td>Custom string</td>
+<td>User-defined identity</td>
+</tr>
+<tr>
+<td><code>--no-masq</code></td>
+<td><code>socat</code></td>
+<td>Argument hiding only</td>
+</tr>
+</table></markdown-accessiblity-table>
+
+**Usage:**
+```bash
 # Masquerade as kernel worker
-./conduit --masq-kernel TCP-LISTEN:8080,fork TCP:10.0.0.5:80
-
-# Masquerade as systemd service
-./conduit --masq-systemd UNIX-LISTEN:/tmp/sock TCP:192.168.1.10:22
-
-# Masquerade as SSH daemon
-./conduit --masq-ssh TCP-LISTEN:22,reuseaddr TCP:real-ssh-server:22
-
-# Random system process
-./conduit --masq-random TCP-LISTEN:443,cert=server.pem TCP:backend:443
+./conduit --masq-kernel TCP-LISTEN:8080,fork TCP:backend:80
 
 # Custom process name
-./conduit --masq '[nginx: worker process]' TCP-LISTEN:80 TCP:app:8080
+./conduit --masq '[nginx: worker process]' TCP-LISTEN:443 TCP:app:8443
 
-# Argument hiding only (no masquerading)
-./conduit --no-masq TCP-LISTEN:3306 TCP:db-server:3306
-
-# List available masquerade options
-./conduit --list-masq
-\`\`\`
+# Argument hiding only
+./conduit --no-masq UNIX-LISTEN:/tmp/sock TCP:10.0.0.5:22
+```
 
 ### Process Masquerading Wrapper
 
-\`\`\`bash
-# Masquerade as specific process
-./process-masq -m 'systemd-resolved' -- TCP-LISTEN:53,fork UDP:8.8.8.8:53
+**Alternative deployment**. Standalone wrapper for existing stealth SOCAT binary.
 
-# Use random identity
-./process-masq -r -- UNIX-LISTEN:/var/run/control TCP:target:443
+```bash
+# Execute with masqueraded identity
+./process-masq -m 'systemd-resolved' -- TCP-LISTEN:53 UDP:8.8.8.8:53
 
-# List available options
+# Random system process selection
+./process-masq -r -- TCP-LISTEN:443,cert=server.pem TCP:internal:443
+
+# List available identities
 ./process-masq -l
-\`\`\`
+```
 
-### Stealth SOCAT (Direct)
+### Stealth SOCAT
 
-\`\`\`bash
-# Standard SOCAT usage with automatic argument hiding
+**Direct execution**. Modified SOCAT with integrated stealth library.
+
+```bash
 cd socat-repo
 ./socat TCP-LISTEN:8080,reuseaddr,fork TCP:example.com:80
 
-# Check process listing - arguments are hidden
-ps aux | grep socat
-\`\`\`
+# Arguments automatically hidden
+# Process name set via prctl/setproctitle
+```
 
-### Common Use Cases
+---
 
-<details>
-<summary><b>Port Forwarding</b></summary>
+## Stealth Modules
 
-\`\`\`bash
-# Forward local port 8080 to remote server
-./conduit --masq-systemd \\
-  TCP-LISTEN:8080,reuseaddr,fork \\
-  TCP:remote-server.example.com:80
-\`\`\`
-</details>
+### Platform-Specific Implementations
 
-<details>
-<summary><b>SSL/TLS Tunnel</b></summary>
+<markdown-accessiblity-table><table>
+<tr>
+<th>Module</th>
+<th>File</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>Linux prctl</td>
+<td><code>socat-repo/stealth.c:45-67</code></td>
+<td>Kernel process name manipulation via PR_SET_NAME. Overwrites /proc/self/comm. Requires CAP_SYS_RESOURCE or same UID.</td>
+</tr>
+<tr>
+<td>BSD setproctitle</td>
+<td><code>socat-repo/stealth.c:69-91</code></td>
+<td>libc-provided process title modification. Updates ps output directly. Available on FreeBSD, OpenBSD, NetBSD.</td>
+</tr>
+<tr>
+<td>Generic argv clear</td>
+<td><code>socat-repo/stealth.c:93-115</code></td>
+<td>Direct memory manipulation of argv array. Zeroes argument strings. Fallback for platforms without native APIs.</td>
+</tr>
+<tr>
+<td>Conduit presets</td>
+<td><code>conduit.c:19-29</code></td>
+<td>Embedded masquerade identities. Kernel workers, system services, daemons. Randomization support.</td>
+</tr>
+<tr>
+<td>Wrapper execution</td>
+<td><code>process-masq.c:48-123</code></td>
+<td>argv[0] manipulation before execv(). Preserves SOCAT arguments. Transparent to relay logic.</td>
+</tr>
+</table></markdown-accessiblity-table>
 
-\`\`\`bash
-# Create encrypted tunnel
-./conduit --masq-ssh \\
-  TCP-LISTEN:443,reuseaddr,fork,cert=server.pem,verify=0 \\
-  TCP:internal-service:8080
-\`\`\`
-</details>
+### Detection Considerations
 
-<details>
-<summary><b>UNIX Socket Relay</b></summary>
+**Hidden from:**
+- `ps aux` — Process list shows masqueraded name
+- `/proc/<pid>/cmdline` — Arguments zeroed in memory
+- `top`, `htop` — Interactive monitors display false identity
+- Basic process inspection — Casual observation defeated
 
-\`\`\`bash
-# Bridge UNIX socket to TCP
-./conduit --masq-kernel \\
-  UNIX-LISTEN:/tmp/control.sock,fork \\
-  TCP:192.168.1.100:9000
-\`\`\`
-</details>
+**Visible to:**
+- `strace`, `dtrace` — System call tracing reveals true behavior
+- Network monitoring — Traffic patterns unchanged
+- EDR/XDR solutions — Behavioral analysis may detect anomalies
+- Kernel security modules — SELinux/AppArmor may flag modifications
+- Memory forensics — Arguments recoverable from RAM dumps
 
-<details>
-<summary><b>SOCKS Proxy</b></summary>
+---
 
-\`\`\`bash
-# SOCKS proxy with masquerading
-./conduit --masq '[kworker/u8:0]' \\
-  TCP-LISTEN:1080,reuseaddr,fork \\
-  SOCKS4A:proxy-server:google.com:80,socksport=1080
-\`\`\`
-</details>
+## SOCAT Channel Types
+
+### Supported Transports
+
+<markdown-accessiblity-table><table>
+<tr>
+<th>Category</th>
+<th>Type</th>
+<th>Syntax</th>
+<th>Example</th>
+</tr>
+<tr>
+<td rowspan="2">TCP</td>
+<td>Connect</td>
+<td><code>TCP:&lt;host&gt;:&lt;port&gt;</code></td>
+<td><code>TCP:example.com:80</code></td>
+</tr>
+<tr>
+<td>Listen</td>
+<td><code>TCP-LISTEN:&lt;port&gt;</code></td>
+<td><code>TCP-LISTEN:8080,fork</code></td>
+</tr>
+<tr>
+<td rowspan="2">UDP</td>
+<td>Datagram</td>
+<td><code>UDP:&lt;host&gt;:&lt;port&gt;</code></td>
+<td><code>UDP:8.8.8.8:53</code></td>
+</tr>
+<tr>
+<td>Listen</td>
+<td><code>UDP-LISTEN:&lt;port&gt;</code></td>
+<td><code>UDP-LISTEN:53,fork</code></td>
+</tr>
+<tr>
+<td rowspan="2">UNIX</td>
+<td>Connect</td>
+<td><code>UNIX-CONNECT:&lt;path&gt;</code></td>
+<td><code>UNIX-CONNECT:/var/run/docker.sock</code></td>
+</tr>
+<tr>
+<td>Listen</td>
+<td><code>UNIX-LISTEN:&lt;path&gt;</code></td>
+<td><code>UNIX-LISTEN:/tmp/control.sock</code></td>
+</tr>
+<tr>
+<td>SSL/TLS</td>
+<td>Secure</td>
+<td><code>OPENSSL:&lt;host&gt;:&lt;port&gt;</code></td>
+<td><code>OPENSSL:server:443,verify=0</code></td>
+</tr>
+<tr>
+<td>SOCKS</td>
+<td>Proxy</td>
+<td><code>SOCKS4A:&lt;proxy&gt;:&lt;target&gt;:&lt;port&gt;</code></td>
+<td><code>SOCKS4A:proxy:target:80</code></td>
+</tr>
+<tr>
+<td>File</td>
+<td>I/O</td>
+<td><code>FILE:&lt;path&gt;</code></td>
+<td><code>FILE:/var/log/output.log,create</code></td>
+</tr>
+<tr>
+<td>PTY</td>
+<td>Terminal</td>
+<td><code>PTY</code></td>
+<td><code>PTY,link=/tmp/pty</code></td>
+</tr>
+</table></markdown-accessiblity-table>
+
+*See `socat-repo/doc/socat.html` for complete reference (50+ types).*
 
 ---
 
 ## Architecture
 
-### Component Overview
-
-\`\`\`
-┌─────────────────────────────────────────────────────────────────┐
-│                         Conduit System                          │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                ┌───────────────┴───────────────┐
-                │                               │
-        ┌───────▼───────┐               ┌──────▼──────┐
-        │  Conduit CLI  │               │ process-masq │
-        │   (conduit)   │               │   wrapper    │
-        └───────┬───────┘               └──────┬───────┘
-                │                               │
-                │  argv manipulation            │  execv() with
-                │  + masquerade preset          │  masqueraded argv[0]
-                │                               │
-                └───────────────┬───────────────┘
-                                │
-                        ┌───────▼────────┐
-                        │  Stealth SOCAT │
-                        │  (socat-repo/) │
-                        └────────────────┘
-                                │
-                ┌───────────────┼───────────────┐
-                │               │               │
-        ┌───────▼──────┐ ┌─────▼──────┐ ┌─────▼──────┐
-        │  stealth.c   │ │  socat.c   │ │  xio-*.c   │
-        │ Arg Hiding   │ │ Main Logic │ │  I/O Ops   │
-        └──────────────┘ └────────────┘ └────────────┘
-                │
-        ┌───────┴────────────────────┐
-        │                            │
-    ┌───▼────┐    ┌──────────┐  ┌───▼────────┐
-    │ prctl  │    │setproctitle│ │argv[] clear│
-    │(Linux) │    │ (BSD/macOS)│ │ (generic)  │
-    └────────┘    └────────────┘ └────────────┘
-\`\`\`
-
-### How Argument Hiding Works
-
-\`\`\`c
-// After argument parsing in main():
-stealth_hide_arguments(argc, argv);
-
-Platform Detection:
-├─ Linux   → prctl(PR_SET_NAME) + argv[] overwrite
-├─ BSD     → setproctitle() + argv[] clearing  
-└─ Generic → Manual argv[] memory zeroing
-\`\`\`
-
-### Process Masquerading Flow
-
-\`\`\`
-1. User invokes: ./conduit --masq-kernel TCP-LISTEN:80 ...
-                     │
-2. Conduit parses masquerade option
-                     │
-3. Sets argv[0] = "[kworker/0:1]"
-                     │
-4. Executes: execv("socat-repo/socat", modified_argv)
-                     │
-5. Stealth SOCAT launches with masqueraded name
-                     │
-6. stealth_hide_arguments() called in main()
-                     │
-7. Result: Process appears as "[kworker/0:1]" with no args
-\`\`\`
-
----
-
-## Project Structure
-
-\`\`\`
+```
 Conduit/
-├── conduit.c                    # Main Conduit binary (unified interface)
-├── conduit                      # Compiled binary
-├── process-masq.c               # Process masquerading wrapper
-├── Makefile                     # Build system
+├── conduit.c                        # Unified binary with presets
+├── process-masq.c                   # Standalone wrapper utility
+├── Makefile                         # Build orchestration
 │
-├── README.md                    # This file
-├── LICENSE                      # GPLv2 with OpenSSL exception
-├── INSTALL.md                   # Installation guide
-├── CHANGELOG.md                 # Version history
-├── SECURITY.md                  # Security policy
-├── CONTRIBUTING.md              # Contribution guidelines
-│
-├── socat-repo/                  # Modified SOCAT 1.7.3.3
-│   ├── stealth.c               # Argument hiding implementation
-│   ├── stealth.h               # Stealth function declarations
-│   ├── socat.c                 # Main program (modified for stealth)
+├── socat-repo/                      # Modified SOCAT 1.7.3.3
+│   ├── stealth.c                   # Platform-specific hiding
+│   ├── stealth.h                   # Function declarations
+│   ├── socat.c                     # Main relay logic (modified)
 │   │
-│   ├── xio-*.c                 # I/O subsystems (50+ modules)
-│   ├── error.c, sysutils.c     # Support libraries
-│   ├── configure               # Autoconf build configuration
-│   └── doc/                    # Original SOCAT documentation
+│   ├── xio-tcp.c                   # TCP channel implementation
+│   ├── xio-unix.c                  # UNIX socket channels
+│   ├── xio-openssl.c               # SSL/TLS encryption
+│   ├── xio-socks.c                 # SOCKS proxy support
+│   ├── [48 additional xio-*.c]     # Other channel types
+│   │
+│   ├── error.c, sysutils.c         # Support libraries
+│   ├── configure                   # Autoconf build system
+│   └── doc/                        # Original SOCAT docs
 │
-├── docs/                        # GitHub Pages site
-│   └── index.html              # Project website
+├── docs/
+│   └── index.html                  # GitHub Pages site
 │
-└── .github/
-    └── workflows/
-        └── ci.yml              # CI/CD pipeline
-\`\`\`
+├── .github/workflows/
+│   └── ci.yml                      # Multi-platform CI/CD
+│
+├── README.md                        # This file
+├── LICENSE                          # GPLv2 + OpenSSL exception
+├── SECURITY.md                      # Security policy
+├── CONTRIBUTING.md                  # Contribution guidelines
+├── INSTALL.md                       # Installation guide
+└── CHANGELOG.md                     # Version history
+```
+
+### Component Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Conduit Execution Path                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              │                               │
+      ┌───────▼────────┐              ┌──────▼──────┐
+      │  Conduit CLI   │              │ process-masq│
+      │  (conduit.c)   │              │  wrapper    │
+      └───────┬────────┘              └──────┬──────┘
+              │                               │
+              │ Parse --masq option           │ Set argv[0]
+              │ Prepare argv[]                │ execv() call
+              │ execv() stealth SOCAT         │
+              │                               │
+              └───────────────┬───────────────┘
+                              │
+                      ┌───────▼────────┐
+                      │  Stealth SOCAT │
+                      │  (socat-repo)  │
+                      └───────┬────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+      ┌───────▼──────┐ ┌─────▼──────┐ ┌─────▼──────┐
+      │  stealth.c   │ │  socat.c   │ │  xio-*.c   │
+      │ Hide args    │ │ Main loop  │ │ Channels   │
+      └──────┬───────┘ └────────────┘ └────────────┘
+             │
+     ┌───────┴────────────────────┐
+     │                            │
+ ┌───▼────┐  ┌──────────┐  ┌─────▼────────┐
+ │ prctl  │  │setproctitle│ │argv[] memset│
+ │(Linux) │  │ (BSD/macOS)│ │  (generic)  │
+ └────────┘  └────────────┘ └──────────────┘
+```
 
 ---
 
-## Tech Stack
+## Configuration
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Language** | C (C99) | Low-level system programming |
-| **Base** | [SOCAT 1.7.3.3](http://www.dest-unreach.org/socat/) | Network relay foundation |
-| **Build System** | GNU Make + Autoconf | Cross-platform compilation |
-| **Platform APIs** | prctl, setproctitle | Process manipulation |
-| **SSL/TLS** | OpenSSL | Encrypted communications |
-| **Readline** | GNU Readline | Interactive features |
+### Compile-Time Options
+
+<markdown-accessiblity-table><table>
+<tr>
+<th>Setting</th>
+<th>Makefile Variable</th>
+<th>Default</th>
+<th>Notes</th>
+</tr>
+<tr>
+<td>Compiler</td>
+<td><code>CC</code></td>
+<td><code>gcc</code></td>
+<td>C compiler binary</td>
+</tr>
+<tr>
+<td>Flags</td>
+<td><code>CFLAGS</code></td>
+<td><code>-Wall -O2</code></td>
+<td>Compilation options</td>
+</tr>
+<tr>
+<td>Install prefix</td>
+<td><code>PREFIX</code></td>
+<td><code>/usr/local</code></td>
+<td>Installation directory</td>
+</tr>
+<tr>
+<td>Binary dir</td>
+<td><code>BINDIR</code></td>
+<td><code>$(PREFIX)/bin</code></td>
+<td>Executable location</td>
+</tr>
+</table></markdown-accessiblity-table>
+
+### Build Targets
+
+```bash
+# Standard build (all components)
+make
+
+# Individual components
+make conduit        # Conduit binary only
+make process-masq   # Wrapper only
+make socat          # Modified SOCAT only
+
+# Installation
+sudo make install PREFIX=/opt/conduit
+
+# Cleanup
+make clean
+```
+
+### Debug Build
+
+```bash
+# Build with symbols and no optimization
+make CFLAGS="-Wall -g -O0"
+
+# Test with verbose output
+./conduit --help
+./conduit --list-masq
+```
 
 ---
 
-## Command Reference
+## Operational Security
 
-### Conduit Options
+### Authorization Framework
 
-| Option | Description |
-|--------|-------------|
-| \`--masq <name>\` | Masquerade as specific process name |
-| \`--masq-kernel\` | Preset: kernel worker thread |
-| \`--masq-systemd\` | Preset: systemd service |
-| \`--masq-ssh\` | Preset: SSH daemon |
-| \`--masq-random\` | Preset: random system process |
-| \`--list-masq\` | Show available masquerade options |
-| \`--no-masq\` | Use argument hiding only |
-| \`--help\` | Display help message |
+**Required before deployment:**
+- ✅ Explicit written authorization from system owners
+- ✅ Documented scope of authorized testing
+- ✅ Incident response coordination with defenders
+- ✅ Communication channel establishment
+- ✅ Legal compliance verification
 
-### SOCAT Address Types (Examples)
+**During operations:**
+- ✅ Operate only within authorized scope
+- ✅ Maintain detailed activity logs
+- ✅ Monitor for unexpected behavior
+- ✅ Coordinate with blue team (if applicable)
+- ✅ Be prepared to explain presence
 
-| Type | Syntax | Example |
-|------|--------|---------|
-| TCP | \`TCP:<host>:<port>\` | \`TCP:example.com:80\` |
-| TCP Listen | \`TCP-LISTEN:<port>\` | \`TCP-LISTEN:8080,fork\` |
-| UDP | \`UDP:<host>:<port>\` | \`UDP:8.8.8.8:53\` |
-| UNIX | \`UNIX-CONNECT:<path>\` | \`UNIX-CONNECT:/var/run/sock\` |
-| UNIX Listen | \`UNIX-LISTEN:<path>\` | \`UNIX-LISTEN:/tmp/control.sock\` |
-| SSL | \`OPENSSL:<host>:<port>\` | \`OPENSSL:server:443,verify=0\` |
-| File | \`FILE:<path>\` | \`FILE:/var/log/output.log,create\` |
-| SOCKS | \`SOCKS4A:<proxy>:<target>:<port>\` | \`SOCKS4A:proxy:target:80\` |
+**After operations:**
+- ✅ Remove all deployed binaries
+- ✅ Document findings for system owners
+- ✅ Verify cleanup with defenders
+- ✅ Update authorization records
+- ✅ Conduct lessons learned review
 
-*See \`socat-repo/doc/socat.html\` for complete address reference (50+ types).*
+### Detection Mitigation
+
+**Process masquerading effectiveness:**
+- Defeats casual inspection (ps, top, htop)
+- Survives basic monitoring tools
+- Requires advanced detection (EDR, syscall tracing)
+
+**Known limitations:**
+- Network traffic remains visible
+- System call patterns detectable
+- Memory forensics recovers arguments
+- Behavioral analysis may flag anomalies
+
+**Defender capabilities:**
+1. Monitor prctl/setproctitle syscalls
+2. Analyze network connection patterns
+3. Trace system calls with strace/eBPF
+4. Inspect process memory with GDB
+5. Deploy EDR/XDR behavioral analysis
+
+### Legal Compliance
+
+**United States:**
+- Computer Fraud and Abuse Act (CFAA) prohibits unauthorized access
+- Authorization must be explicit and documented
+- Exceeding authorized scope constitutes violation
+
+**United Kingdom:**
+- Computer Misuse Act criminalizes unauthorized access
+- Intent and knowledge of unauthorized use relevant
+- Authorization defense requires clear evidence
+
+**European Union:**
+- Various national laws criminalize unauthorized access
+- GDPR considerations for data processed during testing
+- Explicit consent required from data controllers
+
+**User Responsibility:**
+- Verify legal requirements in your jurisdiction
+- Obtain written authorization before deployment
+- Maintain comprehensive documentation
+- Consult legal counsel when uncertain
 
 ---
 
 ## Platform Support
 
-| Platform | Argument Hiding | Process Masquerading | Status |
-|----------|----------------|---------------------|--------|
-| **Linux** | ✅ prctl | ✅ Full support | Tested |
-| **FreeBSD** | ✅ setproctitle | ✅ Full support | Tested |
-| **OpenBSD** | ✅ setproctitle | ✅ Full support | Tested |
-| **macOS** | ✅ setproctitle | ⚠️ Limited | Tested |
-| **Solaris** | ⚠️ Generic fallback | ⚠️ Limited | Untested |
-| **AIX** | ⚠️ Generic fallback | ⚠️ Limited | Untested |
-
-**Legend:**
-- ✅ Full support with platform-specific APIs
-- ⚠️ Generic fallback (may be visible to advanced inspection)
-
----
-
-## Detection Considerations
-
-While Conduit hides process information from basic inspection tools:
-
-| Monitoring Method | Detection Risk |
-|------------------|----------------|
-| \`ps\`, \`top\`, \`htop\` | ✅ Hidden |
-| \`/proc/<pid>/cmdline\` | ✅ Hidden |
-| \`/proc/<pid>/environ\` | ⚠️ Visible |
-| System call tracing (\`strace\`, \`dtrace\`) | 🔴 Visible |
-| Network monitoring | 🔴 Visible |
-| Kernel security modules (SELinux, AppArmor) | 🔴 May detect |
-| EDR/XDR solutions | 🔴 May flag |
-| Forensic memory analysis | 🔴 Recoverable |
-
-**Use within authorized scope and understand monitoring capabilities of target environment.**
-
----
-
-## Development
-
-### Building for Development
-
-\`\`\`bash
-# Debug build with symbols
-make CFLAGS="-Wall -g -O0"
-
-# Optimized build
-make CFLAGS="-Wall -O3 -march=native"
-
-# Clean build artifacts
-make clean
-\`\`\`
-
-### Running Tests
-
-\`\`\`bash
-# Basic functionality tests
-make test
-
-# Test specific component
-./conduit --help
-./conduit --list-masq
-\`\`\`
-
-### Code Style
-
-- **Language**: C99 standard
-- **Indentation**: Matches SOCAT style (mix of tabs/spaces)
-- **Comments**: Inline for complex logic
-- **Error handling**: Perror for system calls
+<markdown-accessiblity-table><table>
+<tr>
+<th>Platform</th>
+<th>Argument Hiding</th>
+<th>Process Masquerading</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>Linux</td>
+<td>✅ prctl</td>
+<td>✅ Full support</td>
+<td>Tested</td>
+</tr>
+<tr>
+<td>FreeBSD</td>
+<td>✅ setproctitle</td>
+<td>✅ Full support</td>
+<td>Tested</td>
+</tr>
+<tr>
+<td>OpenBSD</td>
+<td>✅ setproctitle</td>
+<td>✅ Full support</td>
+<td>Tested</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>✅ setproctitle</td>
+<td>⚠️ Limited</td>
+<td>Tested</td>
+</tr>
+<tr>
+<td>Solaris</td>
+<td>⚠️ Generic fallback</td>
+<td>⚠️ Limited</td>
+<td>Untested</td>
+</tr>
+<tr>
+<td>AIX</td>
+<td>⚠️ Generic fallback</td>
+<td>⚠️ Limited</td>
+<td>Untested</td>
+</tr>
+</table></markdown-accessiblity-table>
 
 ---
 
-## Contributing
+## Security
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+### Vulnerability Reporting
 
-**Areas of interest:**
-- Additional platform support (Windows/Cygwin, Android)
-- Enhanced masquerading presets
-- Improved stealth techniques
-- Bug fixes and testing
-- Documentation improvements
+**Report security issues via:**
+- GitHub Security Advisories (preferred)
+- Private disclosure to maintainers
+- Responsible disclosure timeline (90 days)
 
-**Requirements:**
-- Maintain GPLv2 licensing
-- Include appropriate copyright notices
-- Test on target platforms
-- Update documentation
+**Do NOT:**
+- Open public GitHub issues for vulnerabilities
+- Disclose before coordination with maintainers
+- Exploit vulnerabilities in unauthorized contexts
+
+### Threat Model
+
+**In scope:**
+- Hiding from basic process inspection
+- Masquerading as legitimate processes
+- Authorized testing with known monitoring
+
+**Out of scope:**
+- Evading advanced EDR/XDR systems
+- Anti-forensics or evidence destruction
+- Defeating kernel security modules
+- Sophisticated traffic analysis evasion
+
+### Known Limitations
+
+**Conduit does NOT protect against:**
+- Advanced system call tracing
+- Network traffic analysis
+- Kernel security modules (SELinux, AppArmor)
+- EDR/XDR behavioral monitoring
+- Memory forensics investigation
+
+**Use within authorized scope and understand monitoring capabilities.**
 
 ---
 
-## Legal Notice
+## License
 
-### License
-
-This project is licensed under the **GNU General Public License version 2** (GPLv2) with OpenSSL linking exception, as required by SOCAT's license.
+GNU General Public License version 2 (GPLv2) with OpenSSL linking exception.
 
 **Copyright:**
 - **Conduit modifications**: Copyright © 2026 Real-Fruit-Snacks
@@ -551,52 +689,31 @@ This project is licensed under the **GNU General Public License version 2** (GPL
 
 See [LICENSE](LICENSE) for complete terms.
 
-### Authorized Use Only
-
-⚠️ **This tool is intended for authorized security testing only.**
-
-- Unauthorized access to computer systems is **illegal** in most jurisdictions
-- User is **solely responsible** for compliance with applicable laws
-- Intended for professional security practitioners, researchers, and educators
-- Not intended for malicious purposes or unauthorized access
-- Misuse may result in **criminal prosecution**
-
-**By using this software, you agree to use it only with explicit written authorization from system owners.**
-
-### Disclaimer
-
-\`\`\`
+```
 THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
 THE AUTHORS ARE NOT LIABLE FOR ANY DAMAGES ARISING FROM USE.
-USE AT YOUR OWN RISK. SEE LICENSE FOR DETAILS.
-\`\`\`
+USE AT YOUR OWN RISK.
+```
 
 ---
 
 ## Resources
 
 - **Original SOCAT**: http://www.dest-unreach.org/socat/
-- **Documentation**: \`socat-repo/doc/socat.html\`
-- **Examples**: \`socat-repo/EXAMPLES\`
-- **Security**: See [SECURITY.md](SECURITY.md)
-- **Issues**: https://github.com/Real-Fruit-Snacks/Conduit/issues
-
----
-
-## Acknowledgments
-
-- **Gerhard Rieger** and SOCAT contributors for the foundational relay tool
-- The security research and red team communities
-- All contributors to this project
+- **Documentation**: `socat-repo/doc/socat.html`
+- **Examples**: `socat-repo/EXAMPLES`
+- **Security Policy**: [SECURITY.md](SECURITY.md)
+- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **GitHub**: https://github.com/Real-Fruit-Snacks/Conduit
 
 ---
 
 <div align="center">
 
-**Part of the [Real-Fruit-Snacks](https://github.com/Real-Fruit-Snacks) water-themed security toolkit** 🌊
+**Part of the Real-Fruit-Snacks water-themed security toolkit**
 
-*Tidepool • Riptide • Cascade • Slipstream • HydroShot • **Conduit***
+[Tidepool](https://github.com/Real-Fruit-Snacks/Tidepool) • [Riptide](https://github.com/Real-Fruit-Snacks/Riptide) • [Cascade](https://github.com/Real-Fruit-Snacks/Cascade) • [Slipstream](https://github.com/Real-Fruit-Snacks/Slipstream) • [HydroShot](https://github.com/Real-Fruit-Snacks/HydroShot) • [Aquifer](https://github.com/Real-Fruit-Snacks/Aquifer) • **Conduit**
 
-**Remember: With great power comes great responsibility.**
+*Remember: With great power comes great responsibility.* 🌊
 
 </div>
