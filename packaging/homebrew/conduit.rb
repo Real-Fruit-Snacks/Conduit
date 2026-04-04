@@ -39,8 +39,9 @@ class Conduit < Formula
 
     # Test masquerading options are available
     help_output = shell_output("#{bin}/conduit -h 2>&1")
-    assert_match "-Mk", help_output
     assert_match "-Ms", help_output
+    assert_match "-Mb", help_output
+    assert_match "-Mm", help_output
   end
 
   def caveats
@@ -57,10 +58,12 @@ class Conduit < Formula
       Man page: man conduit
 
       For authorized security operations, use masquerading options:
-        conduit -Mk   # Kernel worker masquerade
         conduit -Ms   # Systemd service masquerade
         conduit -Mb   # Launchd masquerade (macOS)
         conduit -Mm   # mDNSResponder masquerade (macOS)
+
+      Note: Kernel thread names (e.g., [kworker/0:1]) are detectable via
+      PPID mismatch. Use userspace process names for better stealth.
     EOS
   end
 end

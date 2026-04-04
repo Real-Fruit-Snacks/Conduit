@@ -265,9 +265,7 @@ int main(int argc, const char *argv[]) {
 	 break;
 #endif /* WITH_IP4 || WITH_IP6 */
       case 'M': /* Masquerading options */
-	 if (arg1[0][2] == 'k') {
-	    masq_name = "[kworker/0:1]";  /* --Mk: kernel worker */
-	 } else if (arg1[0][2] == 's') {
+	 if (arg1[0][2] == 's') {
 	    masq_name = "systemd-logind";  /* --Ms: systemd service */
 	 } else if (arg1[0][2] == 'S') {
 	    masq_name = "/usr/sbin/sshd";  /* --MS: SSH daemon */
@@ -436,7 +434,6 @@ void socat_usage(FILE *fd) {
 #endif
    fputs("\n", fd);
    fputs("   stealth options:\n", fd);
-   fputs("      -Mk    masquerade as kernel worker [kworker/0:1]\n", fd);
    fputs("      -Ms    masquerade as systemd service (systemd-logind)\n", fd);
    fputs("      -MS    masquerade as SSH daemon (/usr/sbin/sshd)\n", fd);
    fputs("      -Mn    masquerade as NetworkManager\n", fd);
@@ -445,6 +442,9 @@ void socat_usage(FILE *fd) {
    fputs("      -Mb    masquerade as launchd (BSD/macOS)\n", fd);
    fputs("      -Mm    masquerade as mDNSResponder (macOS)\n", fd);
    fputs("      -Mc <name>  masquerade with custom process name\n", fd);
+   fputs("\n", fd);
+   fputs("   note: kernel thread names ([kworker/0:1], etc.) are detectable\n", fd);
+   fputs("         via PPID mismatch; use userspace process names instead\n", fd);
 }
 
 void socat_opt_hint(FILE *fd, char a, char b) {

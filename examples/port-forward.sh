@@ -1,14 +1,14 @@
 #!/bin/bash
-# Port forwarding example with kernel worker masquerade
+# Port forwarding example with systemd masquerade
 # Forwards local port 8080 to remote target:80
 
 CONDUIT="${CONDUIT:-./socat-repo/conduit}"
 
 echo "Starting port forward: localhost:8080 -> target.internal:80"
-echo "Masquerading as: [kworker/0:1]"
+echo "Masquerading as: systemd-logind"
 echo ""
 
-"$CONDUIT" -Mk \
+"$CONDUIT" -Ms \
     TCP-LISTEN:8080,fork,reuseaddr \
     TCP:target.internal:80
 

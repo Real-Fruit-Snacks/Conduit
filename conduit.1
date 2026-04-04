@@ -12,9 +12,6 @@ Conduit establishes bidirectional byte streams between two addresses and transfe
 .SH OPTIONS
 .SS Stealth Options
 .TP
-.B \-Mk
-Masquerade as kernel worker [kworker/0:1]
-.TP
 .B \-Ms
 Masquerade as systemd service (systemd-logind)
 .TP
@@ -113,8 +110,8 @@ Prefer IPv4 if version is not explicitly specified
 Prefer IPv6 if version is not explicitly specified
 .SH EXAMPLES
 .TP
-.B TCP port forwarding with kernel worker masquerade
-conduit \-Mk TCP-LISTEN:8080,fork,reuseaddr TCP:target.internal:80
+.B TCP port forwarding with systemd masquerade
+conduit \-Ms TCP-LISTEN:8080,fork,reuseaddr TCP:target.internal:80
 .TP
 .B HTTPS relay with systemd masquerade
 conduit \-Ms TCP-LISTEN:443,fork TCP:backend:443

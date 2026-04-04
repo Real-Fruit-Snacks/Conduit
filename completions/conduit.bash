@@ -8,7 +8,7 @@ _conduit() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     # Stealth options
-    local stealth_opts="-Mk -Ms -MS -Mn -Md -Mr -Mc"
+    local stealth_opts="-Ms -MS -Mn -Md -Mr -Mb -Mm -Mc"
 
     # Standard SOCAT options
     local standard_opts="-V -h -? -hh -hhh -d -dd -ddd -dddd -D -ly -lf -ls -lm -lp -lu -lh -v -x -b -s -t -T -u -U -g -L -W -4 -6"
@@ -24,7 +24,7 @@ _conduit() {
 
     # Complete -Mc argument (custom masquerade name)
     if [[ ${prev} == "-Mc" ]] ; then
-        local masq_suggestions="[kworker/0:1] [ksoftirqd/0] [rcu_gp] systemd-logind systemd-resolved systemd-journald /usr/sbin/sshd /usr/bin/NetworkManager dbus-daemon"
+        local masq_suggestions="systemd-logind systemd-resolved systemd-journald /usr/sbin/sshd /usr/bin/NetworkManager dbus-daemon launchd mDNSResponder"
         COMPREPLY=( $(compgen -W "${masq_suggestions}" -- ${cur}) )
         return 0
     fi

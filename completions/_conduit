@@ -6,7 +6,6 @@ _conduit() {
     local -a stealth_opts standard_opts address_types
 
     stealth_opts=(
-        '-Mk[masquerade as kernel worker \[kworker/0:1\]]'
         '-Ms[masquerade as systemd service (systemd-logind)]'
         '-MS[masquerade as SSH daemon (/usr/sbin/sshd)]'
         '-Mn[masquerade as NetworkManager]'
@@ -104,10 +103,6 @@ _conduit() {
 _conduit_masq_names() {
     local -a masq_names
     masq_names=(
-        '\[kworker/0:1\]:kernel\ worker'
-        '\[ksoftirqd/0\]:kernel\ softirq\ daemon'
-        '\[rcu_gp\]:RCU\ grace\ period'
-        '\[migration/0\]:CPU\ migration'
         'systemd-logind:systemd\ login\ manager'
         'systemd-resolved:systemd\ DNS\ resolver'
         'systemd-journald:systemd\ journal\ daemon'
