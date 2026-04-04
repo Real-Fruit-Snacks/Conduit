@@ -32,6 +32,15 @@ Masquerade with custom process name
 .TP
 .BI \-Mp " pid"
 Target specific PID by manipulating /proc/sys/kernel/ns_last_pid (Linux only, requires root or CAP_SYS_ADMIN). Forks a child process that will attempt to receive the specified PID. The parent process automatically restores the original ns_last_pid value and exits. Useful for blending into specific PID ranges or mimicking service restart behavior.
+.TP
+.B \-Mo
+Enable OOM (Out-Of-Memory) immunity by setting /proc/self/oom_score_adj to -1000. This prevents the Linux OOM killer from terminating the process under memory pressure. Useful for persistent operations that should not be killed during low-memory conditions.
+.TP
+.BI \-MP " range"
+Set ephemeral port range for outbound connections by writing to /proc/sys/net/ipv4/ip_local_port_range. Format: low-high (e.g., 49152-65535). Useful for blending with standard ephemeral port allocation patterns or targeting specific port ranges. Requires root or CAP_NET_ADMIN.
+.TP
+.B \-Me
+Sanitize environment variables by removing suspicious entries that could reveal the process origin. Removes: SSH_CONNECTION, SSH_CLIENT, SSH_TTY, SUDO_USER, SUDO_UID, SUDO_GID, SUDO_COMMAND, DISPLAY, XAUTHORITY, _, OLDPWD. Useful for removing forensic artifacts from the process environment.
 .SS Standard SOCAT Options
 .TP
 .B \-V
@@ -130,6 +139,12 @@ conduit \-Mr TCP-LISTEN:4444 EXEC:/bin/bash
 .TP
 .B Target specific PID (requires root)
 sudo conduit \-Ms \-Mp 500 TCP-LISTEN:8080 TCP:target:80
+.TP
+.B OOM immunity for persistent relay
+sudo conduit \-Ms \-Mo TCP-LISTEN:443,fork TCP:backend:443
+.TP
+.B Port range control with environment sanitization
+sudo conduit \-Ms \-MP 49152-65535 \-Me TCP-LISTEN:8080 TCP:target:80
 .SH ADDRESS TYPES
 Conduit supports all standard SOCAT address types including:
 .PP

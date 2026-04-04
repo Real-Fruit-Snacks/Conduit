@@ -13,6 +13,9 @@ _conduit() {
         '-Mr[masquerade as systemd-resolved]'
         '-Mc[masquerade with custom process name]:process name:_conduit_masq_names'
         '-Mp[target specific PID (requires root)]:target PID:'
+        '-Mo[enable OOM immunity (prevents kill under memory pressure)]'
+        '-MP[set ephemeral port range]:port range (low-high):'
+        '-Me[sanitize environment (remove SSH_*, SUDO_*, etc.)]'
     )
 
     standard_opts=(

