@@ -616,8 +616,8 @@
                 </div>
 
                 <div class="feature">
-                    <h3>Deployment Flexibility</h3>
-                    <p>Unified Conduit binary with presets. Standalone wrapper. Modified SOCAT with integrated library.</p>
+                    <h3>Built-In Masquerading</h3>
+                    <p>Stealth capabilities compiled directly into SOCAT. No wrapper, no separate tools. Single unified binary handles relay and masquerading.</p>
                 </div>
 
                 <div class="feature">
@@ -705,32 +705,32 @@
         <div class="container">
             <h2>Architecture</h2>
             <p class="section-desc">
-                Three-layer design: Conduit CLI, process wrapper, and modified SOCAT with integrated stealth library.
+                Unified binary: SOCAT 1.7.3.3 with integrated argument hiding and process masquerading built-in.
             </p>
 
             <div class="architecture-grid">
                 <div class="arch-item">
                     <span class="number">1</span>
-                    <h3>Initialization</h3>
-                    <p>Parse arguments and validate options. Detect platform capabilities. Select appropriate stealth method (<code>prctl</code>, <code>setproctitle</code>, or fallback).</p>
+                    <h3>Unified Binary</h3>
+                    <p>Single compiled SOCAT with masquerading options. No wrapper, no separate utilities. Stealth is built into the relay engine from startup.</p>
                 </div>
 
                 <div class="arch-item">
                     <span class="number">2</span>
                     <h3>Argument Hiding</h3>
-                    <p>Zero command-line arguments from memory. Overwrite <code>/proc/self/cmdline</code>. Clear argv[] boundaries. Microsecond execution time.</p>
+                    <p>Command-line arguments erased from memory. Overwrite <code>/proc/self/cmdline</code>. Clear argv[] boundaries. Activated via <code>-MA</code> flag.</p>
                 </div>
 
                 <div class="arch-item">
                     <span class="number">3</span>
                     <h3>Process Masquerading</h3>
-                    <p>Set process name via platform API. Update <code>ps</code> output. Maintain masquerade throughout execution. Support preset and custom identities.</p>
+                    <p>Set process name via <code>prctl</code> (Linux), <code>setproctitle</code> (BSD), or generic fallback. Masquerade flags: <code>-Mk</code> (kernel), <code>-Ms</code> (system), <code>-Mn</code> (name), <code>-Md</code> (daemon).</p>
                 </div>
 
                 <div class="arch-item">
                     <span class="number">4</span>
-                    <h3>SOCAT Relay</h3>
-                    <p>Execute full bidirectional relay. Maintain all SOCAT features. No performance degradation. Transparent stealth layer.</p>
+                    <h3>Full Relay</h3>
+                    <p>Execute complete bidirectional relay with 100+ SOCAT options. All channel types supported. Stealth transparent to relay operation.</p>
                 </div>
             </div>
         </div>
@@ -806,8 +806,8 @@ make test
                         <span class="terminal-title">kernel-worker.sh</span>
                     </div>
                     <div class="terminal-content">
-                        <pre><span class="comment"># Masquerade as kernel worker</span>
-./conduit --masq-kernel \
+                        <pre><span class="comment"># Masquerade as kernel worker with argument hiding</span>
+./conduit -Mk -MA \
   TCP-LISTEN:8080,fork \
   TCP:backend:80
 
@@ -824,12 +824,12 @@ make test
                         <span class="terminal-title">ssl-tunnel.sh</span>
                     </div>
                     <div class="terminal-content">
-                        <pre><span class="comment"># Encrypted relay with masquerade</span>
-./conduit --masq-systemd \
+                        <pre><span class="comment"># Encrypted relay with system daemon masquerade</span>
+./conduit -Ms -MA \
   TCP-LISTEN:443,cert=server.pem \
   TCP:internal-service:8080
 
-<span class="comment"># Appears as systemd-logind</span></pre>
+<span class="comment"># Appears as system daemon service</span></pre>
                     </div>
                 </div>
             </div>
@@ -843,12 +843,12 @@ make test
                         <span class="terminal-title">unix-socket.sh</span>
                     </div>
                     <div class="terminal-content">
-                        <pre><span class="comment"># UNIX socket to TCP bridge</span>
-./conduit --masq '[nginx]' \
+                        <pre><span class="comment"># UNIX socket to TCP bridge with custom name</span>
+./conduit -Mn=nginx -MA \
   UNIX-LISTEN:/tmp/control.sock \
   TCP:192.168.1.100:9000
 
-<span class="comment"># Custom masquerade name</span></pre>
+<span class="comment"># Custom masquerade: appears as nginx</span></pre>
                     </div>
                 </div>
 
@@ -860,12 +860,12 @@ make test
                         <span class="terminal-title">socks-proxy.sh</span>
                     </div>
                     <div class="terminal-content">
-                        <pre><span class="comment"># SOCKS proxy with masquerade</span>
-./conduit --masq-random \
+                        <pre><span class="comment"># SOCKS proxy with random daemon masquerade</span>
+./conduit -Md -Mr -MA \
   TCP-LISTEN:1080,fork \
   SOCKS4A:proxy:target:80
 
-<span class="comment"># Random system process identity</span></pre>
+<span class="comment"># Daemon with randomized process identity</span></pre>
                     </div>
                 </div>
             </div>

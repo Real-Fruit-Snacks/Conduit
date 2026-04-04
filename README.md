@@ -43,11 +43,11 @@ Native Linux implementation (prctl). BSD family support (setproctitle). macOS pa
 </td>
 <td width="50%">
 
-**Zero Configuration**  
-Stealth activates automatically. No config files required. No environment variables. Single binary deployment.
+**Unified Binary**  
+Single Conduit executable with integrated stealth. SOCAT 1.7.3.3 core with masquerading options. No separate wrapper or utility binaries required. Seamless deployment.
 
-**Deployment Flexibility**  
-Unified Conduit binary with presets. Standalone process wrapper. Modified SOCAT with integrated library. Choose deployment model per operation.
+**Built-In Presets**  
+Kernel worker masquerading (-Mk). System service identities (-Ms). SSH daemon impersonation (-MS). Random process selection (-Mn). Custom names (-Md). Argument-only hiding (-Mr, -Mc).
 
 **Detection Awareness**  
 Documented evasion boundaries. Known EDR/XDR limitations. Network traffic remains visible. Kernel security module considerations.
@@ -100,11 +100,10 @@ Legal compliance emphasis. Defender detection methods documented. Authorization 
 git clone https://github.com/Real-Fruit-Snacks/Conduit.git
 cd Conduit
 
-# Build all components
+# Build the unified binary
 make
 
 # Verify build
-make test
 ./conduit --help
 ./conduit --list-masq
 ```
@@ -112,13 +111,13 @@ make test
 ### Verification
 
 ```bash
-# Test argument hiding
-./conduit --masq-kernel TCP-LISTEN:8080,fork TCP:10.0.0.5:80 &
+# Test with kernel worker masquerading
+./conduit -Mk TCP-LISTEN:8080,fork TCP:10.0.0.5:80 &
 ps aux | grep conduit    # Arguments hidden
 ps aux | grep kworker    # Appears as kernel worker
 
-# Test masquerade options
-./conduit --list-masq
+# List all masquerading presets
+./conduit --help
 
 # Clean up
 killall conduit
@@ -128,20 +127,28 @@ killall conduit
 
 ## Execution Flow
 
-### Stage 1: Initialization
-1. **Parse arguments** — SOCAT command-line processing unchanged
-2. **Validate options** — Check masquerade preset or custom name
+### Stage 1: Option Parsing
+1. **Parse masquerade flag** — Check for -M* options
+   - `-Mk` = kernel worker
+   - `-Ms` = system service
+   - `-MS` = SSH daemon
+   - `-Mn` = random process
+   - `-Md <name>` = custom name
+   - `-Mr` = argument hiding only
+   - `-Mc` = config preset
+2. **Parse SOCAT arguments** — Standard SOCAT command-line processing
 3. **Platform detection** — Identify prctl/setproctitle availability
 
-### Stage 2: Argument Hiding
+### Stage 2: Masquerading Setup
 ```c
-// After argument parsing in main():
-stealth_hide_arguments(argc, argv);
+// In socat.c main() before relay starts:
+if (masq_option_set) {
+    apply_masquerade(masq_type, masq_name);
+}
 
 // Platform-specific implementation:
 #ifdef __linux__
     prctl(PR_SET_NAME, process_name, 0, 0, 0);
-    memset(argv[0], 0, strlen(argv[0]));
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
     setproctitle("%s", process_name);
 #else
@@ -150,10 +157,16 @@ stealth_hide_arguments(argc, argv);
         memset(argv[i], 0, strlen(argv[i]));
     }
 #endif
+
+// Always zero argument strings
+memset(argv[0], 0, strlen(argv[0]));
+for (int i = 1; i < argc; i++) {
+    memset(argv[i], 0, strlen(argv[i]));
+}
 ```
 
-### Stage 3: SOCAT Execution
-- Stealth layer transparent to relay logic
+### Stage 3: Relay Execution
+- Masquerading transparent to relay logic
 - All SOCAT features operational
 - No performance degradation
 - Bidirectional data flow maintained
@@ -164,7 +177,7 @@ stealth_hide_arguments(argc, argv);
 
 ### Conduit Binary
 
-**Primary deployment method**. Unified executable with built-in masquerade presets.
+**Unified executable** with integrated stealth. SOCAT 1.7.3.3 with built-in masquerading options.
 
 <markdown-accessiblity-table><table>
 <tr>
@@ -173,74 +186,55 @@ stealth_hide_arguments(argc, argv);
 <th>Use Case</th>
 </tr>
 <tr>
-<td><code>--masq-kernel</code></td>
+<td><code>-Mk</code></td>
 <td><code>[kworker/0:1]</code></td>
 <td>Kernel worker thread</td>
 </tr>
 <tr>
-<td><code>--masq-systemd</code></td>
+<td><code>-Ms</code></td>
 <td><code>systemd-logind</code></td>
 <td>System service daemon</td>
 </tr>
 <tr>
-<td><code>--masq-ssh</code></td>
+<td><code>-MS</code></td>
 <td><code>/usr/sbin/sshd</code></td>
 <td>SSH server process</td>
 </tr>
 <tr>
-<td><code>--masq-random</code></td>
+<td><code>-Mn</code></td>
 <td>(random selection)</td>
 <td>Randomized system process</td>
 </tr>
 <tr>
-<td><code>--masq '&lt;name&gt;'</code></td>
+<td><code>-Md &lt;name&gt;</code></td>
 <td>Custom string</td>
 <td>User-defined identity</td>
 </tr>
 <tr>
-<td><code>--no-masq</code></td>
+<td><code>-Mr</code></td>
 <td><code>socat</code></td>
 <td>Argument hiding only</td>
+</tr>
+<tr>
+<td><code>-Mc</code></td>
+<td>Configuration preset</td>
+<td>Predefined masquerade</td>
 </tr>
 </table></markdown-accessiblity-table>
 
 **Usage:**
 ```bash
 # Masquerade as kernel worker
-./conduit --masq-kernel TCP-LISTEN:8080,fork TCP:backend:80
+./conduit -Mk TCP-LISTEN:8080,fork TCP:backend:80
 
 # Custom process name
-./conduit --masq '[nginx: worker process]' TCP-LISTEN:443 TCP:app:8443
+./conduit -Md 'nginx: worker process' TCP-LISTEN:443 TCP:app:8443
 
 # Argument hiding only
-./conduit --no-masq UNIX-LISTEN:/tmp/sock TCP:10.0.0.5:22
-```
+./conduit -Mr UNIX-LISTEN:/tmp/sock TCP:10.0.0.5:22
 
-### Process Masquerading Wrapper
-
-**Alternative deployment**. Standalone wrapper for existing stealth SOCAT binary.
-
-```bash
-# Execute with masqueraded identity
-./process-masq -m 'systemd-resolved' -- TCP-LISTEN:53 UDP:8.8.8.8:53
-
-# Random system process selection
-./process-masq -r -- TCP-LISTEN:443,cert=server.pem TCP:internal:443
-
-# List available identities
-./process-masq -l
-```
-
-### Stealth SOCAT
-
-**Direct execution**. Modified SOCAT with integrated stealth library.
-
-```bash
-cd socat-repo
-./socat TCP-LISTEN:8080,reuseaddr,fork TCP:example.com:80
-
-# Arguments automatically hidden
-# Process name set via prctl/setproctitle
+# Random system process
+./conduit -Mn TCP-LISTEN:9090,fork TCP:internal:8080
 ```
 
 ---
@@ -256,29 +250,54 @@ cd socat-repo
 <th>Description</th>
 </tr>
 <tr>
-<td>Linux prctl</td>
-<td><code>socat-repo/stealth.c:45-67</code></td>
+<td>Linux prctl masquerading</td>
+<td><code>socat-repo/socat.c (masq_prctl)</code></td>
 <td>Kernel process name manipulation via PR_SET_NAME. Overwrites /proc/self/comm. Requires CAP_SYS_RESOURCE or same UID.</td>
 </tr>
 <tr>
-<td>BSD setproctitle</td>
-<td><code>socat-repo/stealth.c:69-91</code></td>
+<td>BSD setproctitle masquerading</td>
+<td><code>socat-repo/socat.c (masq_setproctitle)</code></td>
 <td>libc-provided process title modification. Updates ps output directly. Available on FreeBSD, OpenBSD, NetBSD.</td>
 </tr>
 <tr>
-<td>Generic argv clear</td>
-<td><code>socat-repo/stealth.c:93-115</code></td>
+<td>Generic argv zeroing</td>
+<td><code>socat-repo/socat.c (masq_argv_clear)</code></td>
 <td>Direct memory manipulation of argv array. Zeroes argument strings. Fallback for platforms without native APIs.</td>
 </tr>
 <tr>
-<td>Conduit presets</td>
-<td><code>conduit.c:19-29</code></td>
-<td>Embedded masquerade identities. Kernel workers, system services, daemons. Randomization support.</td>
+<td>Kernel worker preset</td>
+<td><code>socat-repo/socat.c (-Mk option)</code></td>
+<td>Masquerade as Linux kernel worker thread [kworker/0:1].</td>
 </tr>
 <tr>
-<td>Wrapper execution</td>
-<td><code>process-masq.c:48-123</code></td>
-<td>argv[0] manipulation before execv(). Preserves SOCAT arguments. Transparent to relay logic.</td>
+<td>System service preset</td>
+<td><code>socat-repo/socat.c (-Ms option)</code></td>
+<td>Masquerade as system service (systemd-logind).</td>
+</tr>
+<tr>
+<td>SSH daemon preset</td>
+<td><code>socat-repo/socat.c (-MS option)</code></td>
+<td>Masquerade as SSH server (/usr/sbin/sshd).</td>
+</tr>
+<tr>
+<td>Random process preset</td>
+<td><code>socat-repo/socat.c (-Mn option)</code></td>
+<td>Random system process selection from pool of common services.</td>
+</tr>
+<tr>
+<td>Custom name option</td>
+<td><code>socat-repo/socat.c (-Md option)</code></td>
+<td>User-specified custom process name masquerading.</td>
+</tr>
+<tr>
+<td>Argument hiding only</td>
+<td><code>socat-repo/socat.c (-Mr option)</code></td>
+<td>Zero arguments without changing process name. Preserves /proc/self/comm.</td>
+</tr>
+<tr>
+<td>Config preset</td>
+<td><code>socat-repo/socat.c (-Mc option)</code></td>
+<td>Load masquerade configuration from file or preset identifier.</td>
 </tr>
 </table></markdown-accessiblity-table>
 
@@ -377,14 +396,11 @@ cd socat-repo
 
 ```
 Conduit/
-├── conduit.c                        # Unified binary with presets
-├── process-masq.c                   # Standalone wrapper utility
 ├── Makefile                         # Build orchestration
 │
-├── socat-repo/                      # Modified SOCAT 1.7.3.3
-│   ├── stealth.c                   # Platform-specific hiding
-│   ├── stealth.h                   # Function declarations
-│   ├── socat.c                     # Main relay logic (modified)
+├── socat-repo/                      # SOCAT 1.7.3.3 with integrated stealth
+│   ├── socat.c                     # Main relay + masquerading options
+│   │                                # Integrated -Mk, -Ms, -MS, -Mn, -Md, -Mr, -Mc
 │   │
 │   ├── xio-tcp.c                   # TCP channel implementation
 │   ├── xio-unix.c                  # UNIX socket channels
@@ -414,40 +430,28 @@ Conduit/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Conduit Execution Path                   │
+│                Unified Conduit Binary Flow                  │
 └─────────────────────────────────────────────────────────────┘
                               │
-              ┌───────────────┴───────────────┐
-              │                               │
-      ┌───────▼────────┐              ┌──────▼──────┐
-      │  Conduit CLI   │              │ process-masq│
-      │  (conduit.c)   │              │  wrapper    │
-      └───────┬────────┘              └──────┬──────┘
-              │                               │
-              │ Parse --masq option           │ Set argv[0]
-              │ Prepare argv[]                │ execv() call
-              │ execv() stealth SOCAT         │
-              │                               │
-              └───────────────┬───────────────┘
-                              │
-                      ┌───────▼────────┐
-                      │  Stealth SOCAT │
-                      │  (socat-repo)  │
-                      └───────┬────────┘
+                      ┌───────▼─────────┐
+                      │  Conduit Binary │
+                      │  (conduit/socat)│
+                      └───────┬─────────┘
                               │
               ┌───────────────┼───────────────┐
               │               │               │
-      ┌───────▼──────┐ ┌─────▼──────┐ ┌─────▼──────┐
-      │  stealth.c   │ │  socat.c   │ │  xio-*.c   │
-      │ Hide args    │ │ Main loop  │ │ Channels   │
-      └──────┬───────┘ └────────────┘ └────────────┘
-             │
-     ┌───────┴────────────────────┐
-     │                            │
- ┌───▼────┐  ┌──────────┐  ┌─────▼────────┐
- │ prctl  │  │setproctitle│ │argv[] memset│
- │(Linux) │  │ (BSD/macOS)│ │  (generic)  │
- └────────┘  └────────────┘ └──────────────┘
+       ┌──────▼─────┐  ┌──────▼──────┐ ┌─────▼──────┐
+       │ Parse -M*  │  │  socat.c    │ │  xio-*.c   │
+       │ options    │  │  Main loop  │ │  Channels  │
+       └──────┬─────┘  └─────────────┘ └────────────┘
+              │
+     ┌────────┴────────────────────┐
+     │                             │
+ ┌───▼────┐  ┌──────────┐  ┌──────▼─────┐
+ │ prctl  │  │setproctitle│ │argv[] zero  │
+ │(Linux) │  │(BSD/macOS) │ │ (generic)   │
+ │-Mk,-Md │  │-Ms,-MS,-Mn │ │ -Mr,-Mc     │
+ └────────┘  └────────────┘ └─────────────┘
 ```
 
 ---
@@ -492,13 +496,11 @@ Conduit/
 ### Build Targets
 
 ```bash
-# Standard build (all components)
+# Build unified binary
 make
 
-# Individual components
-make conduit        # Conduit binary only
-make process-masq   # Wrapper only
-make socat          # Modified SOCAT only
+# Build specific binary
+make conduit
 
 # Installation
 sudo make install PREFIX=/opt/conduit
@@ -513,9 +515,8 @@ make clean
 # Build with symbols and no optimization
 make CFLAGS="-Wall -g -O0"
 
-# Test with verbose output
-./conduit --help
-./conduit --list-masq
+# Verify build with help
+./conduit -h
 ```
 
 ---
