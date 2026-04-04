@@ -179,16 +179,13 @@ for (int i = 1; i < argc; i++) {
 
 **Unified executable** with integrated stealth. SOCAT 1.7.3.3 with built-in masquerading options.
 
+#### Process Masquerading Options
+
 <markdown-accessiblity-table><table>
 <tr>
 <th>Option</th>
 <th>Process Name</th>
 <th>Use Case</th>
-</tr>
-<tr>
-<td><code>-Mk</code></td>
-<td><code>[kworker/0:1]</code></td>
-<td>Kernel worker thread</td>
 </tr>
 <tr>
 <td><code>-Ms</code></td>
@@ -202,39 +199,92 @@ for (int i = 1; i < argc; i++) {
 </tr>
 <tr>
 <td><code>-Mn</code></td>
-<td>(random selection)</td>
-<td>Randomized system process</td>
+<td><code>NetworkManager</code></td>
+<td>Network service</td>
 </tr>
 <tr>
-<td><code>-Md &lt;name&gt;</code></td>
-<td>Custom string</td>
-<td>User-defined identity</td>
+<td><code>-Md</code></td>
+<td><code>dbus-daemon</code></td>
+<td>D-Bus message bus</td>
 </tr>
 <tr>
 <td><code>-Mr</code></td>
-<td><code>socat</code></td>
-<td>Argument hiding only</td>
+<td><code>systemd-resolved</code></td>
+<td>DNS resolver service</td>
 </tr>
 <tr>
-<td><code>-Mc</code></td>
-<td>Configuration preset</td>
-<td>Predefined masquerade</td>
+<td><code>-Mc &lt;name&gt;</code></td>
+<td>Custom string</td>
+<td>User-defined identity</td>
 </tr>
 </table></markdown-accessiblity-table>
 
-**Usage:**
+#### Advanced Stealth Options
+
+<markdown-accessiblity-table><table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Requirements</th>
+</tr>
+<tr>
+<td><code>-Mp &lt;pid&gt;</code></td>
+<td>Target specific PID by manipulating <code>/proc/sys/kernel/ns_last_pid</code>. Process will attempt to receive the specified PID.</td>
+<td>Root or CAP_SYS_ADMIN (Linux only)</td>
+</tr>
+<tr>
+<td><code>-Mo</code></td>
+<td>Enable OOM immunity by setting <code>/proc/self/oom_score_adj</code> to -1000. Prevents Linux OOM killer termination.</td>
+<td>Root or appropriate capabilities</td>
+</tr>
+<tr>
+<td><code>-MP &lt;range&gt;</code></td>
+<td>Set ephemeral port range (e.g., <code>49152-65535</code>) by writing to <code>/proc/sys/net/ipv4/ip_local_port_range</code>.</td>
+<td>Root or CAP_NET_ADMIN</td>
+</tr>
+<tr>
+<td><code>-Me</code></td>
+<td>Sanitize environment by removing <code>SSH_*</code>, <code>SUDO_*</code>, <code>DISPLAY</code>, <code>XAUTHORITY</code>, and other forensic artifacts.</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>-Mt &lt;pid&gt;</code></td>
+<td>Match start time of target PID using time namespaces. Process appears with same start time in <code>ps</code> output.</td>
+<td>Kernel 5.6+, CAP_SYS_ADMIN</td>
+</tr>
+</table></markdown-accessiblity-table>
+
+**Basic Usage:**
 ```bash
-# Masquerade as kernel worker
-./conduit -Mk TCP-LISTEN:8080,fork TCP:backend:80
+# Masquerade as systemd service
+./conduit -Ms TCP-LISTEN:8080,fork TCP:backend:80
+
+# Masquerade as SSH daemon
+./conduit -MS TCP-LISTEN:2222 TCP:internal-ssh:22
 
 # Custom process name
-./conduit -Md 'nginx: worker process' TCP-LISTEN:443 TCP:app:8443
+./conduit -Mc 'nginx: worker process' TCP-LISTEN:443 TCP:app:8443
 
-# Argument hiding only
-./conduit -Mr UNIX-LISTEN:/tmp/sock TCP:10.0.0.5:22
+# NetworkManager masquerade
+./conduit -Mn UDP-LISTEN:53,fork UDP:8.8.8.8:53
+```
 
-# Random system process
-./conduit -Mn TCP-LISTEN:9090,fork TCP:internal:8080
+**Advanced Stealth:**
+```bash
+# Target specific PID (requires root)
+sudo ./conduit -Ms -Mp 500 TCP-LISTEN:8080 TCP:target:80
+
+# OOM immunity for persistent relay
+sudo ./conduit -Ms -Mo TCP-LISTEN:443,fork TCP:backend:443
+
+# Port range control with environment sanitization
+sudo ./conduit -Ms -MP 49152-65535 -Me TCP-LISTEN:8080 TCP:target:80
+
+# Match target process start time (requires kernel 5.6+)
+sudo ./conduit -Ms -Mt 500 TCP-LISTEN:8080 TCP:target:80
+
+# Full process impersonation (PID + start time + OOM immunity)
+sudo ./conduit -Ms -Mp 500 -Mt 500 -Mo -Me TCP-LISTEN:443 TCP:backend:443
 ```
 
 ---
