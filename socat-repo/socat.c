@@ -410,6 +410,7 @@ int main(int argc, const char *argv[]) {
 
    Atexit(socat_unlock);
 
+#ifdef __linux__
    /* Time namespace manipulation - match target process start time */
    if (target_time_pid > 0) {
       char stat_path[256];
@@ -525,7 +526,9 @@ int main(int argc, const char *argv[]) {
       /* Child continues in new time namespace */
       Notice2("Time namespace: matched PID %d (offset %lld seconds)", target_time_pid, offset_sec);
    }
+#endif /* __linux__ */
 
+#ifdef __linux__
    /* PID manipulation if requested (requires CAP_SYS_ADMIN or root) */
    if (target_pid > 0) {
       int fd;
@@ -574,7 +577,9 @@ int main(int argc, const char *argv[]) {
       close(fd);
       Info2("PID manipulation successful: target %d, actual %d", target_pid, getpid());
    }
+#endif /* __linux__ */
 
+#ifdef __linux__
    /* OOM immunity - prevent process termination under memory pressure */
    if (oom_immune) {
       int fd = open("/proc/self/oom_score_adj", O_WRONLY);
@@ -606,6 +611,7 @@ int main(int argc, const char *argv[]) {
          Warn1("Failed to open ip_local_port_range: %s", strerror(errno));
       }
    }
+#endif /* __linux__ */
 
    /* Environment sanitization - remove suspicious variables */
    if (clean_env) {
