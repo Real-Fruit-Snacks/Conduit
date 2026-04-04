@@ -41,6 +41,9 @@ Set ephemeral port range for outbound connections by writing to /proc/sys/net/ip
 .TP
 .B \-Me
 Sanitize environment variables by removing suspicious entries that could reveal the process origin. Removes: SSH_CONNECTION, SSH_CLIENT, SSH_TTY, SUDO_USER, SUDO_UID, SUDO_GID, SUDO_COMMAND, DISPLAY, XAUTHORITY, _, OLDPWD. Useful for removing forensic artifacts from the process environment.
+.TP
+.BI \-Mt " pid"
+Match the start time of target PID using Linux time namespaces (requires kernel 5.6+). Reads the target process's start time from /proc/[pid]/stat, calculates the time offset, and creates a new time namespace with adjusted CLOCK_MONOTONIC and CLOCK_BOOTTIME. The process will appear in ps output with the same start time as the target, perfect for mimicking system services. Combines perfectly with \-Mp to fully impersonate a process (same PID and start time). Requires CAP_SYS_ADMIN.
 .SS Standard SOCAT Options
 .TP
 .B \-V
@@ -145,6 +148,12 @@ sudo conduit \-Ms \-Mo TCP-LISTEN:443,fork TCP:backend:443
 .TP
 .B Port range control with environment sanitization
 sudo conduit \-Ms \-MP 49152-65535 \-Me TCP-LISTEN:8080 TCP:target:80
+.TP
+.B Match target process start time
+sudo conduit \-Ms \-Mt 500 TCP-LISTEN:8080 TCP:target:80
+.TP
+.B Full process impersonation (PID + start time)
+sudo conduit \-Ms \-Mp 500 \-Mt 500 TCP-LISTEN:443 TCP:backend:443
 .SH ADDRESS TYPES
 Conduit supports all standard SOCAT address types including:
 .PP

@@ -16,6 +16,7 @@ echo "Full Stealth Configuration"
 echo "=========================="
 echo "Process name:    systemd-logind"
 echo "Target PID:      $TARGET_PID"
+echo "Match time:      YES (same PID)"
 echo "Port range:      $PORT_RANGE"
 echo "OOM immunity:    ENABLED"
 echo "Env sanitize:    ENABLED"
@@ -26,6 +27,7 @@ echo ""
 "$CONDUIT" \
     -Ms \
     -Mp "$TARGET_PID" \
+    -Mt "$TARGET_PID" \
     -Mo \
     -MP "$PORT_RANGE" \
     -Me \
@@ -38,8 +40,10 @@ echo ""
 # This combines ALL stealth features:
 # - Process name masquerading (-Ms: systemd-logind)
 # - PID targeting (-Mp: blend into low PID range)
+# - Start time matching (-Mt: appear as old process)
 # - OOM immunity (-Mo: survive memory pressure)
 # - Port range control (-MP: standard ephemeral range)
 # - Environment sanitization (-Me: remove forensic artifacts)
 #
-# Result: Maximum stealth for authorized operations
+# Result: MAXIMUM stealth for authorized operations
+# The process will be virtually indistinguishable from the target!

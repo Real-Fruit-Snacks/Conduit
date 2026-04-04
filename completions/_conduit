@@ -16,6 +16,7 @@ _conduit() {
         '-Mo[enable OOM immunity (prevents kill under memory pressure)]'
         '-MP[set ephemeral port range]:port range (low-high):'
         '-Me[sanitize environment (remove SSH_*, SUDO_*, etc.)]'
+        '-Mt[match start time of target PID (requires kernel 5.6+)]:target PID:'
     )
 
     standard_opts=(

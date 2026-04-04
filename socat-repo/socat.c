@@ -112,6 +112,7 @@ int main(int argc, const char *argv[]) {
    /* Masquerading support - process name to display */
    const char* masq_name = NULL;
    int target_pid = -1;
+   int target_time_pid = -1;
    int oom_immune = 0;
    int port_range_low = -1;
    int port_range_high = -1;
@@ -320,6 +321,15 @@ int main(int argc, const char *argv[]) {
 	 } else if (arg1[0][2] == 'e') {
 	    /* --Me: clean environment */
 	    clean_env = 1;
+	 } else if (arg1[0][2] == 't') {
+	    /* --Mt: match time of PID follows */
+	    if (arg1[1]) {
+	       target_time_pid = atoi(arg1[1]);
+	       ++arg1, --argc;
+	    } else {
+	       Error("option -Mt requires an argument; use option \"-h\" for help");
+	       Exit(1);
+	    }
 	 } else {
 	    socat_opt_hint(stderr, arg1[0][1], arg1[0][2]);
 	    Exit(1);
@@ -399,6 +409,122 @@ int main(int argc, const char *argv[]) {
    }
 
    Atexit(socat_unlock);
+
+   /* Time namespace manipulation - match target process start time */
+   if (target_time_pid > 0) {
+      char stat_path[256];
+      char stat_buf[4096];
+      int fd, ret;
+      unsigned long long target_starttime, boot_time;
+      long long offset_sec;
+
+      /* Read target process start time from /proc/[pid]/stat */
+      snprintf(stat_path, sizeof(stat_path), "/proc/%d/stat", target_time_pid);
+      fd = open(stat_path, O_RDONLY);
+      if (fd < 0) {
+         Error2("Failed to open %s: %s", stat_path, strerror(errno));
+         Exit(1);
+      }
+
+      ret = read(fd, stat_buf, sizeof(stat_buf) - 1);
+      close(fd);
+      if (ret < 0) {
+         Error1("Failed to read target process stat: %s", strerror(errno));
+         Exit(1);
+      }
+      stat_buf[ret] = '\0';
+
+      /* Parse field 22 (starttime) - skip to 22nd field after comm field */
+      char *p = strchr(stat_buf, ')');
+      if (!p) {
+         Error("Failed to parse target process stat");
+         Exit(1);
+      }
+      p += 2; /* Skip ') ' */
+
+      /* Count 19 more fields (we're at field 3 after comm) to reach field 22 */
+      int field = 3;
+      while (field < 22 && *p) {
+         while (*p && *p != ' ') p++;
+         if (*p) p++;
+         field++;
+      }
+
+      if (sscanf(p, "%llu", &target_starttime) != 1) {
+         Error("Failed to parse target starttime");
+         Exit(1);
+      }
+
+      /* Read system boot time from /proc/stat */
+      fd = open("/proc/stat", O_RDONLY);
+      if (fd < 0) {
+         Error1("Failed to open /proc/stat: %s", strerror(errno));
+         Exit(1);
+      }
+
+      ret = read(fd, stat_buf, sizeof(stat_buf) - 1);
+      close(fd);
+      if (ret < 0) {
+         Error1("Failed to read /proc/stat: %s", strerror(errno));
+         Exit(1);
+      }
+      stat_buf[ret] = '\0';
+
+      /* Find "btime" line */
+      p = strstr(stat_buf, "btime ");
+      if (!p || sscanf(p + 6, "%llu", &boot_time) != 1) {
+         Error("Failed to parse system boot time");
+         Exit(1);
+      }
+
+      /* Calculate offset: target started at (boot + target_starttime/HZ) seconds
+       * We want to appear to have the same start time
+       * Current time is now, target time was boot + target_starttime/HZ
+       * Offset = target_time - current_time (will be negative for older processes)
+       */
+      long hz = sysconf(_SC_CLK_TCK);
+      unsigned long long target_start_sec = boot_time + (target_starttime / hz);
+      unsigned long long current_sec = time(NULL);
+      offset_sec = (long long)target_start_sec - (long long)current_sec;
+
+      /* Create time namespace */
+      ret = unshare(0x00000080); /* CLONE_NEWTIME = 0x00000080 */
+      if (ret < 0) {
+         Error1("Failed to create time namespace: %s (requires kernel 5.6+ and CAP_SYS_ADMIN)", strerror(errno));
+         Exit(1);
+      }
+
+      /* Write monotonic and boottime offsets */
+      fd = open("/proc/self/timens_offsets", O_WRONLY);
+      if (fd < 0) {
+         Error1("Failed to open timens_offsets: %s", strerror(errno));
+         Exit(1);
+      }
+
+      char offset_buf[128];
+      snprintf(offset_buf, sizeof(offset_buf), "monotonic %lld 0\nboottime %lld 0\n", offset_sec, offset_sec);
+      if (write(fd, offset_buf, strlen(offset_buf)) < 0) {
+         Error1("Failed to write timens_offsets: %s", strerror(errno));
+         close(fd);
+         Exit(1);
+      }
+      close(fd);
+
+      /* Fork to enter the new time namespace */
+      pid_t time_pid = fork();
+      if (time_pid < 0) {
+         Error1("fork() for time namespace failed: %s", strerror(errno));
+         Exit(1);
+      }
+
+      if (time_pid > 0) {
+         /* Parent exits */
+         Exit(0);
+      }
+
+      /* Child continues in new time namespace */
+      Notice2("Time namespace: matched PID %d (offset %lld seconds)", target_time_pid, offset_sec);
+   }
 
    /* PID manipulation if requested (requires CAP_SYS_ADMIN or root) */
    if (target_pid > 0) {
@@ -579,6 +705,7 @@ void socat_usage(FILE *fd) {
    fputs("      -Mo         enable OOM immunity (prevents kill under memory pressure)\n", fd);
    fputs("      -MP <range> set ephemeral port range (e.g., -MP 49152-65535)\n", fd);
    fputs("      -Me         sanitize environment (remove SSH_*, SUDO_*, etc.)\n", fd);
+   fputs("      -Mt <pid>   match start time of target PID (requires kernel 5.6+)\n", fd);
    fputs("\n", fd);
    fputs("   note: kernel thread names ([kworker/0:1], etc.) are detectable\n", fd);
    fputs("         via PPID mismatch; use userspace process names instead\n", fd);
