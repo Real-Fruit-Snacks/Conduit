@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            install_deps: sudo apt-get update && sudo apt-get install -y libssl-dev libreadline-dev
+          - os: macos-latest
+            install_deps: brew install openssl readline
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: ${{ matrix.install_deps }}
+
+    - name: Build Conduit
+      run: make conduit
+
+    - name: Build process-masq
+      run: make process-masq
+
+    - name: Build stealth SOCAT
+      run: |
+        cd socat-repo
+        ./configure
+        make
+
+    - name: Run tests
+      run: make test
+
+    - name: Check binary size
+      run: |
+        ls -lh conduit
+        ls -lh socat-repo/socat
+
+    - name: Upload Conduit binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: conduit-${{ matrix.os }}
+        path: conduit
+
+    - name: Upload stealth SOCAT binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: socat-stealth-${{ matrix.os }}
+        path: socat-repo/socat
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './docs'
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run security checks
+      run: |
+        # Check for common security issues in C code
+        if command -v cppcheck &> /dev/null; then
+          echo "Running cppcheck..."
+          cppcheck --enable=warning,style --error-exitcode=0 conduit.c process-masq.c
+        fi
+
+        # Check for hardcoded secrets
+        echo "Checking for hardcoded secrets..."
+        ! grep -rE '(password|secret|api_key|token)\s*=\s*["\047][^"\047]+["\047]' --include='*.c' --include='*.h' . || echo "⚠️ Potential hardcoded secrets found"
+
+    - name: Legal compliance check
+      run: |
+        echo "Verifying license headers..."
+        if ! grep -q "GNU General Public License" LICENSE; then
+          echo "❌ LICENSE file missing or invalid"
+          exit 1
+        fi
+        if ! grep -q "OpenSSL" LICENSE; then
+          echo "❌ OpenSSL exception missing from LICENSE"
+          exit 1
+        fi
+        echo "✅ License compliance verified"

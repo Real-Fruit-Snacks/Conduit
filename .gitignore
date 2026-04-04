@@ -1,0 +1,40 @@
+# Compiled binaries
+conduit
+process-masq
+socat-repo/socat
+socat-repo/filan
+socat-repo/procan
+*.o
+*.so
+*.a
+
+# Build artifacts
+socat-repo/config.log
+socat-repo/config.status
+socat-repo/Makefile
+socat-repo/.deps/
+socat-repo/autom4te.cache/
+
+# AI/OMC artifacts - DO NOT UPLOAD
+.omc/
+socat-repo/.omc/
+docs/superpowers/
+*.backup
+
+# Test files
+test-masq
+simple-masq-test
+minimal_stealth_test
+test_stealth_standalone
+test_headers
+*.tmp
+
+# Editor files
+*~
+*.swp
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
