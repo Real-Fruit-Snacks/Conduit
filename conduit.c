@@ -49,7 +49,7 @@ void show_help() {
 
 void list_masquerade_options() {
     printf("Available masquerade process names:\n");
-    for (int i = 0; i < sizeof(masq_options)/sizeof(masq_options[0]); i++) {
+    for (size_t i = 0; i < sizeof(masq_options)/sizeof(masq_options[0]); i++) {
         printf("  %s\n", masq_options[i]);
     }
 }

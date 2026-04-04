@@ -21,6 +21,9 @@ socat-repo/.omc/
 docs/superpowers/
 *.backup
 
+# But DO include docs/assets (logos, etc)
+!docs/assets/
+
 # Test files
 test-masq
 simple-masq-test
