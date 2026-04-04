@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            install_deps: sudo apt-get update && sudo apt-get install -y libssl-dev libreadline-dev
+          - os: macos-latest
+            platform: macos
+            install_deps: brew install openssl readline
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: ${{ matrix.install_deps }}
+
+    - name: Build all
+      run: make all
+
+    - name: Create tarball
+      run: |
+        mkdir -p conduit-${{ matrix.platform }}
+        cp conduit conduit-${{ matrix.platform }}/
+        cp socat-repo/socat conduit-${{ matrix.platform }}/socat-stealth
+        cp README.md LICENSE conduit-${{ matrix.platform }}/
+        tar -czf conduit-${{ matrix.platform }}.tar.gz conduit-${{ matrix.platform }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: conduit-${{ matrix.platform }}
+        path: conduit-${{ matrix.platform }}.tar.gz
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/conduit-linux/conduit-linux.tar.gz
+          artifacts/conduit-macos/conduit-macos.tar.gz
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
