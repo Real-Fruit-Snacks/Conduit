@@ -1,0 +1,1 @@
+#define HAVE_POLL_H 1\n#define HAVE_SYS_UTS_H 1\n#define HAVE_FCNTL_H 1\n#define HAVE_UNISTD_H 1\n#define HAVE_SYS_SOCKET_H 1\n#define HAVE_SYS_TIME_H 1\n#define HAVE_SYS_TYPES_H 1\n#include <poll.h>\n#include <sys/utsname.h>\n#include <fcntl.h>\n#include <sys/socket.h>\n#include <sys/time.h>

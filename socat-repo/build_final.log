@@ -1,0 +1,130 @@
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o socat.o socat.c
+socat.c: In function ‘main’:
+socat.c:91:8: warning: unused variable ‘i’ [-Wunused-variable]
+   91 |    int i, argc0, result;
+      |        ^
+socat.c: In function ‘gettimestamp’:
+socat.c:1147:13: warning: implicit declaration of function ‘gettimeofday’; did you mean ‘Gettimeofday’? [-Wimplicit-function-declaration]
+ 1147 |    result = gettimeofday(&now, NULL);
+      |             ^~~~~~~~~~~~
+      |             Gettimeofday
+socat.c:1137:11: warning: variable ‘bytes’ set but not used [-Wunused-but-set-variable]
+ 1137 |    size_t bytes;
+      |           ^~~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioinitialize.o xioinitialize.c
+xioinitialize.c: In function ‘xio_fork’:
+xioinitialize.c:214:13: warning: unused variable ‘cpid’ [-Wunused-variable]
+  214 |       pid_t cpid = Getpid();
+      |             ^~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiohelp.o xiohelp.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioparam.o xioparam.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiodiag.o xiodiag.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioopen.o xioopen.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioopts.o xioopts.c
+xioopts.c: In function ‘parseopts_table’:
+xioopts.c:1770:16: warning: variable ‘opt’ set but not used [-Wunused-but-set-variable]
+ 1770 |    struct opt *opt;
+      |                ^~~
+In file included from xioopen.h:14,
+                 from xioopts.c:8:
+xioopts.c: In function ‘groupbits’:
+sycls.h:211:22: warning: implicit declaration of function ‘fstat64’; did you mean ‘Fstat64’? [-Wimplicit-function-declaration]
+  211 | #define Fstat64(f,b) fstat64(f,b)
+      |                      ^~~~~~~
+xioopts.c:2610:8: note: in expansion of macro ‘Fstat64’
+ 2610 |        Fstat64(fd, &buf) < 0
+      |        ^~~~~~~
+xioopts.c: In function ‘applyopts’:
+sycls.h:221:21: warning: implicit declaration of function ‘fchmod’; did you mean ‘Fchmod’? [-Wimplicit-function-declaration]
+  221 | #define Fchmod(f,m) fchmod(f,m)
+      |                     ^~~~~~
+xioopts.c:3323:17: note: in expansion of macro ‘Fchmod’
+ 3323 |             if (Fchmod(fd, opt->value.u_modet) < 0) {
+      |                 ^~~~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiosignal.o xiosignal.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiosigchld.o xiosigchld.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioread.o xioread.c
+In file included from xioread.c:11:
+xio-socket.h:92:31: warning: ‘union sockaddr_union’ declared inside parameter list will not be visible outside of this definition or declaration
+   92 |                         union sockaddr_union *us, socklen_t uslen,
+      |                               ^~~~~~~~~~~~~~
+xio-socket.h:112:24: warning: ‘union sockaddr_union’ declared inside parameter list will not be visible outside of this definition or declaration
+  112 |                  union sockaddr_union *pa, union sockaddr_union *la);
+      |                        ^~~~~~~~~~~~~~
+xio-socket.h:114:45: warning: ‘union sockaddr_union’ declared inside parameter list will not be visible outside of this definition or declaration
+  114 | int xiosetsockaddrenv(const char *lr, union sockaddr_union *sau, socklen_t salen, int proto);
+      |                                             ^~~~~~~~~~~~~~
+xio-socket.h:118:28: warning: ‘struct xiorange’ declared inside parameter list will not be visible outside of this definition or declaration
+  118 |                     struct xiorange *range);
+      |                            ^~~~~~~~
+xio-socket.h:120:57: warning: ‘struct xiorange’ declared inside parameter list will not be visible outside of this definition or declaration
+  120 | int xioparserange(const char *rangename, int pf, struct xiorange *range);
+      |                                                         ^~~~~~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiowrite.o xiowrite.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiolayer.o xiolayer.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioshutdown.o xioshutdown.c
+xioshutdown.c: In function ‘xioshutdown’:
+xioshutdown.c:43:12: warning: unused variable ‘writenull’ [-Wunused-variable]
+   43 |       char writenull;
+      |            ^~~~~~~~~
+At top level:
+xioshutdown.c:13:13: warning: ‘signal_kill_pid’ defined but not used [-Wunused-function]
+   13 | static void signal_kill_pid(int dummy) {
+      |             ^~~~~~~~~~~~~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioclose.o xioclose.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioexit.o xioexit.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-process.o xio-process.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-fd.o xio-fd.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-fdnum.o xio-fdnum.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-stdio.o xio-stdio.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-pipe.o xio-pipe.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-gopen.o xio-gopen.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-creat.o xio-creat.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-file.o xio-file.c
+xio-file.c:14:12: warning: ‘xioopen_open’ declared ‘static’ but never defined [-Wunused-function]
+   14 | static int xioopen_open(int argc, const char *argv[], struct opt *opts, int xioflags, xiofile_t *fd, unsigned groups, int dummy1, int dummy2, int dummy3);
+      |            ^~~~~~~~~~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-named.o xio-named.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xio-socket.o xio-socket.c
+xio-socket.c:2099:18: warning: ‘struct opt’ declared inside parameter list will not be visible outside of this definition or declaration
+ 2099 | xiosocket(struct opt *opts, int pf, int socktype, int proto, int msglevel) {
+      |                  ^~~
+xio-socket.c: In function ‘xiosocket’:
+xio-socket.c:2102:4: warning: implicit declaration of function ‘retropt_int’ [-Wimplicit-function-declaration]
+ 2102 |    retropt_int(opts, OPT_SO_TYPE, &socktype);
+      |    ^~~~~~~~~~~
+xio-socket.c:2102:22: error: ‘OPT_SO_TYPE’ undeclared (first use in this function); did you mean ‘SO_TYPE’?
+ 2102 |    retropt_int(opts, OPT_SO_TYPE, &socktype);
+      |                      ^~~~~~~~~~~
+      |                      SO_TYPE
+xio-socket.c:2102:22: note: each undeclared identifier is reported only once for each function it appears in
+xio-socket.c:2103:22: error: ‘OPT_SO_PROTOTYPE’ undeclared (first use in this function)
+ 2103 |    retropt_int(opts, OPT_SO_PROTOTYPE, &proto);
+      |                      ^~~~~~~~~~~~~~~~
+xio-socket.c:2104:13: warning: implicit declaration of function ‘Socket’; did you mean ‘socket’? [-Wimplicit-function-declaration]
+ 2104 |    result = Socket(pf, socktype, proto);
+      |             ^~~~~~
+      |             socket
+xio-socket.c:2106:7: warning: implicit declaration of function ‘Msg4’ [-Wimplicit-function-declaration]
+ 2106 |       Msg4(msglevel, "socket(%d, %d, %d): %s",
+      |       ^~~~
+xio-socket.c: At top level:
+xio-socket.c:2117:22: warning: ‘struct opt’ declared inside parameter list will not be visible outside of this definition or declaration
+ 2117 | xiosocketpair(struct opt *opts, int pf, int socktype, int proto, int sv[2]) {
+      |                      ^~~
+xio-socket.c: In function ‘xiosocketpair’:
+xio-socket.c:2120:22: error: ‘OPT_SO_TYPE’ undeclared (first use in this function); did you mean ‘SO_TYPE’?
+ 2120 |    retropt_int(opts, OPT_SO_TYPE, &socktype);
+      |                      ^~~~~~~~~~~
+      |                      SO_TYPE
+xio-socket.c:2121:22: error: ‘OPT_SO_PROTOTYPE’ undeclared (first use in this function)
+ 2121 |    retropt_int(opts, OPT_SO_PROTOTYPE, &proto);
+      |                      ^~~~~~~~~~~~~~~~
+xio-socket.c:2122:13: warning: implicit declaration of function ‘Socketpair’; did you mean ‘socketpair’? [-Wimplicit-function-declaration]
+ 2122 |    result = Socketpair(pf, socktype, proto, sv);
+      |             ^~~~~~~~~~
+      |             socketpair
+xio-socket.c:2124:7: warning: implicit declaration of function ‘Error5’ [-Wimplicit-function-declaration]
+ 2124 |       Error5("socketpair(%d, %d, %d, %p): %s",
+      |       ^~~~~~
+make: *** [<builtin>: xio-socket.o] Error 1

@@ -1,0 +1,60 @@
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o socat.o socat.c
+socat.c: In function ‘main’:
+socat.c:91:8: warning: unused variable ‘i’ [-Wunused-variable]
+   91 |    int i, argc0, result;
+      |        ^
+socat.c: In function ‘gettimestamp’:
+socat.c:1147:13: warning: implicit declaration of function ‘gettimeofday’; did you mean ‘Gettimeofday’? [-Wimplicit-function-declaration]
+ 1147 |    result = gettimeofday(&now, NULL);
+      |             ^~~~~~~~~~~~
+      |             Gettimeofday
+socat.c:1137:11: warning: variable ‘bytes’ set but not used [-Wunused-but-set-variable]
+ 1137 |    size_t bytes;
+      |           ^~~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioinitialize.o xioinitialize.c
+xioinitialize.c: In function ‘xio_fork’:
+xioinitialize.c:214:13: warning: unused variable ‘cpid’ [-Wunused-variable]
+  214 |       pid_t cpid = Getpid();
+      |             ^~~~
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiohelp.o xiohelp.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioparam.o xioparam.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xiodiag.o xiodiag.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioopen.o xioopen.c
+gcc -O -D_GNU_SOURCE -Wall -Wno-parentheses  -DHAVE_CONFIG_H -I.  -I.   -c -o xioopts.o xioopts.c
+xioopts.c: In function ‘parseopts_table’:
+xioopts.c:2080:19: warning: implicit declaration of function ‘getgrnam’; did you mean ‘getpwnam’? [-Wimplicit-function-declaration]
+ 2080 |             grp = getgrnam(token);
+      |                   ^~~~~~~~
+      |                   getpwnam
+xioopts.c:2080:17: warning: assignment to ‘struct group *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+ 2080 |             grp = getgrnam(token);
+      |                 ^
+xioopts.c:2085:42: error: invalid use of undefined type ‘struct group’
+ 2085 |             (*opts)[i].value.u_gidt = grp->gr_gid;
+      |                                          ^~
+xioopts.c:1770:16: warning: variable ‘opt’ set but not used [-Wunused-but-set-variable]
+ 1770 |    struct opt *opt;
+      |                ^~~
+In file included from xioopen.h:14,
+                 from xioopts.c:8:
+xioopts.c: In function ‘groupbits’:
+sycls.h:211:22: warning: implicit declaration of function ‘fstat64’; did you mean ‘Fstat64’? [-Wimplicit-function-declaration]
+  211 | #define Fstat64(f,b) fstat64(f,b)
+      |                      ^~~~~~~
+xioopts.c:2610:8: note: in expansion of macro ‘Fstat64’
+ 2610 |        Fstat64(fd, &buf) < 0
+      |        ^~~~~~~
+xioopts.c: In function ‘applyopts’:
+sycls.h:221:21: warning: implicit declaration of function ‘fchmod’; did you mean ‘Fchmod’? [-Wimplicit-function-declaration]
+  221 | #define Fchmod(f,m) fchmod(f,m)
+      |                     ^~~~~~
+xioopts.c:3323:17: note: in expansion of macro ‘Fchmod’
+ 3323 |             if (Fchmod(fd, opt->value.u_modet) < 0) {
+      |                 ^~~~~~
+sycls.h:199:25: warning: implicit declaration of function ‘initgroups’; did you mean ‘Initgroups’? [-Wimplicit-function-declaration]
+  199 | #define Initgroups(u,g) initgroups(u,g)
+      |                         ^~~~~~~~~~
+xioopts.c:3387:20: note: in expansion of macro ‘Initgroups’
+ 3387 |                if (Initgroups(pwd->pw_name, pwd->pw_gid) < 0) {
+      |                    ^~~~~~~~~~
+make: *** [<builtin>: xioopts.o] Error 1

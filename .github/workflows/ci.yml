@@ -31,9 +31,6 @@ jobs:
     - name: Build Conduit
       run: make conduit
 
-    - name: Build process-masq
-      run: make process-masq
-
     - name: Build stealth SOCAT
       run: |
         cd socat-repo
@@ -96,7 +93,7 @@ jobs:
         # Check for common security issues in C code
         if command -v cppcheck &> /dev/null; then
           echo "Running cppcheck..."
-          cppcheck --enable=warning,style --error-exitcode=0 conduit.c process-masq.c
+          cppcheck --enable=warning,style --error-exitcode=0 conduit.c
         fi
 
         # Check for hardcoded secrets
