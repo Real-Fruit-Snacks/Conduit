@@ -8,24 +8,17 @@ BINDIR = $(PREFIX)/bin
 
 # Targets
 CONDUIT = conduit
-PROCESS_MASQ = process-masq
 SOCAT = socat-repo/socat
 
-.PHONY: all clean install uninstall socat help
+.PHONY: all clean install uninstall socat help test
 
-all: $(CONDUIT) $(PROCESS_MASQ) socat
+all: $(CONDUIT) socat
 
 # Build Conduit binary
 $(CONDUIT): conduit.c
 	@echo "Building Conduit..."
 	$(CC) $(CFLAGS) -o $(CONDUIT) conduit.c
 	@echo "✓ Conduit built successfully"
-
-# Build process masquerading wrapper
-$(PROCESS_MASQ): process-masq.c
-	@echo "Building process-masq wrapper..."
-	$(CC) $(CFLAGS) -o $(PROCESS_MASQ) process-masq.c
-	@echo "✓ process-masq built successfully"
 
 # Build stealth SOCAT
 socat:
@@ -40,7 +33,7 @@ socat:
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -f $(CONDUIT) $(PROCESS_MASQ)
+	rm -f $(CONDUIT)
 	@if [ -f socat-repo/Makefile ]; then \
 		cd socat-repo && $(MAKE) clean; \
 	fi
@@ -52,18 +45,15 @@ install: all
 	@echo "Installing binaries to $(BINDIR)..."
 	install -d $(BINDIR)
 	install -m 755 $(CONDUIT) $(BINDIR)/
-	install -m 755 $(PROCESS_MASQ) $(BINDIR)/
 	install -m 755 $(SOCAT) $(BINDIR)/socat-stealth
 	@echo "✓ Installation complete"
 	@echo "  - conduit -> $(BINDIR)/conduit"
-	@echo "  - process-masq -> $(BINDIR)/process-masq"
 	@echo "  - socat-stealth -> $(BINDIR)/socat-stealth"
 
 # Uninstall binaries
 uninstall:
 	@echo "Uninstalling binaries..."
 	rm -f $(BINDIR)/$(CONDUIT)
-	rm -f $(BINDIR)/$(PROCESS_MASQ)
 	rm -f $(BINDIR)/socat-stealth
 	@echo "✓ Uninstall complete"
 
@@ -81,7 +71,6 @@ help:
 	@echo "Targets:"
 	@echo "  all          - Build all components (default)"
 	@echo "  conduit      - Build only Conduit binary"
-	@echo "  process-masq - Build only process-masq wrapper"
 	@echo "  socat        - Build only stealth SOCAT"
 	@echo "  clean        - Remove build artifacts"
 	@echo "  install      - Install binaries to $(PREFIX)"
