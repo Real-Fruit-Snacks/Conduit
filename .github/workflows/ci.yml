@@ -35,6 +35,7 @@ jobs:
       run: |
         cd socat-repo
         ./configure
+        touch doc/socat.1
         make
 
     - name: Run tests
