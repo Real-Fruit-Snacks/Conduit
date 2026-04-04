@@ -1,0 +1,194 @@
+.TH CONDUIT 1 "2026-04-04" "Conduit 1.0.0" "User Commands"
+.SH NAME
+conduit \- network relay with process masquerading
+.SH SYNOPSIS
+.B conduit
+[\fIOPTIONS\fR] \fI<address1>\fR \fI<address2>\fR
+.SH DESCRIPTION
+.B Conduit
+is a network relay tool with integrated process masquerading capabilities, built on SOCAT 1.7.3.3. It provides secure data tunneling with stealth features for authorized security testing and defensive operations.
+.PP
+Conduit establishes bidirectional byte streams between two addresses and transfers data between them. Addresses can be files, pipes, devices, sockets, or other stream-like endpoints.
+.SH OPTIONS
+.SS Stealth Options
+.TP
+.B \-Mk
+Masquerade as kernel worker [kworker/0:1]
+.TP
+.B \-Ms
+Masquerade as systemd service (systemd-logind)
+.TP
+.B \-MS
+Masquerade as SSH daemon (/usr/sbin/sshd)
+.TP
+.B \-Mn
+Masquerade as NetworkManager
+.TP
+.B \-Md
+Masquerade as dbus-daemon
+.TP
+.B \-Mr
+Masquerade as systemd-resolved
+.TP
+.BI \-Mc " name"
+Masquerade with custom process name
+.SS Standard SOCAT Options
+.TP
+.B \-V
+Print version and feature information to stdout, and exit
+.TP
+.BR \-h ", " \-?
+Print help text describing command line options and addresses
+.TP
+.B \-hh
+Like \-h, plus a list of all common address option names
+.TP
+.B \-hhh
+Like \-hh, plus a list of all available address option names
+.TP
+.B \-d[\fIdddd\fR]
+Increase verbosity (use up to 4 times; 2 are recommended)
+.TP
+.B \-D
+Analyze file descriptors before loop
+.TP
+.B \-ly[\fIfacility\fR]
+Log to syslog, using facility (default is daemon)
+.TP
+.BI \-lf logfile
+Log to file
+.TP
+.B \-ls
+Log to stderr (default if no other log)
+.TP
+.B \-lm[\fIfacility\fR]
+Mixed log mode (stderr during initialization, then syslog)
+.TP
+.BI \-lp progname
+Set the program name used for logging
+.TP
+.B \-lu
+Use microseconds for logging timestamps
+.TP
+.B \-lh
+Add hostname to log messages
+.TP
+.B \-v
+Verbose data traffic, text
+.TP
+.B \-x
+Verbose data traffic, hexadecimal
+.TP
+.BI \-b size
+Set data buffer size (8192)
+.TP
+.B \-s
+Sloppy (continue on error)
+.TP
+.BI \-t timeout
+Wait seconds before closing second channel
+.TP
+.BI \-T timeout
+Total inactivity timeout in seconds
+.TP
+.B \-u
+Unidirectional mode (left to right)
+.TP
+.B \-U
+Unidirectional mode (right to left)
+.TP
+.B \-g
+Do not check option groups
+.TP
+.BI \-L " lockfile"
+Try to obtain lock, or fail
+.TP
+.BI \-W " lockfile"
+Try to obtain lock, or wait
+.TP
+.B \-4
+Prefer IPv4 if version is not explicitly specified
+.TP
+.B \-6
+Prefer IPv6 if version is not explicitly specified
+.SH EXAMPLES
+.TP
+.B TCP port forwarding with kernel worker masquerade
+conduit \-Mk TCP-LISTEN:8080,fork,reuseaddr TCP:target.internal:80
+.TP
+.B HTTPS relay with systemd masquerade
+conduit \-Ms TCP-LISTEN:443,fork TCP:backend:443
+.TP
+.B Custom process name
+conduit \-Mc "[ksoftirqd/0]" TCP-LISTEN:22 TCP:real-ssh:22
+.TP
+.B UDP relay with daemon masquerade
+conduit \-Md UDP-LISTEN:53,fork UDP:8.8.8.8:53
+.TP
+.B Reverse shell relay
+conduit \-Mr TCP-LISTEN:4444 EXEC:/bin/bash
+.SH ADDRESS TYPES
+Conduit supports all standard SOCAT address types including:
+.PP
+TCP, TCP-LISTEN, UDP, UDP-LISTEN, UNIX-CONNECT, UNIX-LISTEN, EXEC, SYSTEM, PIPE, STDIO, FILE, GOPEN, INTERFACE, IP4-SENDTO, IP6-SENDTO, OPENSSL, OPENSSL-LISTEN, PROXY, PTY, READLINE, SCTP-CONNECT, SCTP-LISTEN, SOCKS4, SOCKS4A, TUN
+.PP
+For full address documentation, see the SOCAT manual or use:
+.br
+.B conduit \-h
+.SH SECURITY CONSIDERATIONS
+.PP
+Process masquerading modifies the process name visible in system monitoring tools (ps, top, etc.) to blend network operations with legitimate system processes. This is intended for:
+.IP \(bu 2
+Authorized penetration testing
+.IP \(bu 2
+Red team operations with written authorization
+.IP \(bu 2
+CTF competitions
+.IP \(bu 2
+Defensive security operations
+.IP \(bu 2
+Educational purposes
+.PP
+.B Unauthorized use is prohibited and may be illegal in your jurisdiction.
+.PP
+Conduit inherits all security features and considerations from SOCAT, including SSL/TLS support, certificate validation, and secure socket options.
+.SH FILES
+.TP
+.I /usr/local/bin/conduit
+Default installation location
+.SH NOTES
+Conduit is a derivative work of SOCAT 1.7.3.3 by Gerhard Rieger and contributors. All SOCAT features and address types are supported.
+.PP
+Process masquerading uses platform-native APIs:
+.IP \(bu 2
+Linux: prctl(PR_SET_NAME)
+.IP \(bu 2
+BSD/macOS: setproctitle()
+.PP
+Argument hiding is automatic for all operations to prevent disclosure via process listings.
+.SH BUGS
+Report bugs at: https://github.com/Real-Fruit-Snacks/Conduit/issues
+.SH AUTHORS
+.PP
+Conduit (process masquerading and stealth features):
+.br
+Real-Fruit-Snacks (2026)
+.PP
+SOCAT (base functionality):
+.br
+Gerhard Rieger and contributors (2001-2023)
+.br
+See www.dest-unreach.org
+.SH LICENSE
+GNU General Public License version 2 with OpenSSL exception.
+.PP
+See the LICENSE file for full details.
+.SH "SEE ALSO"
+.BR socat (1),
+.BR nc (1),
+.BR netcat (1),
+.BR ssh (1)
+.PP
+Online documentation:
+.br
+https://real-fruit-snacks.github.io/Conduit

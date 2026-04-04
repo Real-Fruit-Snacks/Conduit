@@ -12,13 +12,10 @@ cd Conduit
 ### 2. Build
 
 ```bash
-# Build all components
+# Build the unified binary
 make
 
-# Or build individually
-make conduit        # Build Conduit binary only
-make socat          # Build stealth SOCAT only
-make process-masq   # Build process-masq wrapper only
+# The binary will be at: socat-repo/conduit
 ```
 
 ### 3. Test
@@ -27,8 +24,8 @@ make process-masq   # Build process-masq wrapper only
 make test
 
 # Or test manually
-./conduit --help
-./conduit --list-masq
+./socat-repo/conduit -h
+./socat-repo/conduit -V
 ```
 
 ### 4. Install (Optional)
@@ -48,7 +45,7 @@ sudo make install PREFIX=/opt/conduit
 - GNU Make
 - Standard C library (glibc or musl)
 
-### Optional (for stealth SOCAT)
+### Optional (for full features)
 - OpenSSL development libraries (`libssl-dev` on Debian/Ubuntu)
 - GNU readline development libraries (`libreadline-dev`)
 - TCP wrappers (`libwrap0-dev`)
@@ -77,6 +74,11 @@ brew install gcc make openssl readline
 
 ## Build Options
 
+### Standard Build
+```bash
+make
+```
+
 ### Debug Build
 ```bash
 make CFLAGS="-Wall -g -O0"
@@ -88,18 +90,45 @@ make CFLAGS="-Wall -O3 -march=native"
 ```
 
 ### Static Build (Portable)
+
+For maximum portability, build a static binary that includes all dependencies:
+
 ```bash
 cd socat-repo
 ./configure LDFLAGS="-static"
-make
+make conduit
 ```
 
-## Installation Paths
+The resulting static binary can be copied to any system with the same architecture without requiring shared libraries. This is ideal for:
+- Deploying to minimal/embedded systems
+- Creating portable security tools
+- Avoiding dependency issues
+- Running in containers without runtime dependencies
+
+**Note:** Static builds are significantly larger (~2-3MB vs ~400KB) but are completely self-contained.
+
+### Cross-Compilation
+
+To build for a different architecture:
+
+```bash
+# For ARM64
+cd socat-repo
+./configure --host=aarch64-linux-gnu CC=aarch64-linux-gnu-gcc
+make conduit
+
+# For 32-bit x86
+cd socat-repo
+./configure --host=i686-linux-gnu CC=i686-linux-gnu-gcc CFLAGS="-m32"
+make conduit
+```
+
+## Installation
+
+### Binary Installation
 
 Default installation locations (PREFIX=/usr/local):
-- `/usr/local/bin/conduit` - Conduit binary
-- `/usr/local/bin/process-masq` - Process masquerading wrapper
-- `/usr/local/bin/socat-stealth` - Stealth SOCAT binary
+- `/usr/local/bin/conduit` - Main binary
 
 Custom installation:
 ```bash
@@ -110,6 +139,54 @@ make install PREFIX=$HOME/.local
 sudo make install PREFIX=/opt
 ```
 
+### Man Page Installation
+
+```bash
+# Install man page
+sudo install -m 644 conduit.1 /usr/local/share/man/man1/
+sudo mandb  # Update man database
+
+# Test
+man conduit
+```
+
+### Shell Completion Installation
+
+**Bash:**
+```bash
+# System-wide
+sudo install -m 644 completions/conduit.bash /etc/bash_completion.d/
+
+# User-only
+mkdir -p ~/.local/share/bash-completion/completions/
+install -m 644 completions/conduit.bash ~/.local/share/bash-completion/completions/conduit
+```
+
+**Zsh:**
+```bash
+# System-wide
+sudo install -m 644 completions/_conduit /usr/local/share/zsh/site-functions/
+
+# User-only
+mkdir -p ~/.zsh/completions/
+install -m 644 completions/_conduit ~/.zsh/completions/
+# Add to ~/.zshrc: fpath=(~/.zsh/completions $fpath)
+```
+
+### Example Scripts
+
+Example scripts are located in the `examples/` directory:
+
+```bash
+# Install examples
+sudo mkdir -p /usr/local/share/conduit/examples
+sudo install -m 755 examples/*.sh /usr/local/share/conduit/examples/
+
+# Or copy to home directory
+mkdir -p ~/.local/share/conduit/examples
+cp examples/*.sh ~/.local/share/conduit/examples/
+```
+
 ## Uninstall
 
 ```bash
@@ -117,6 +194,11 @@ sudo make uninstall
 
 # Or with custom prefix
 sudo make uninstall PREFIX=/opt/conduit
+
+# Remove man page and completions
+sudo rm -f /usr/local/share/man/man1/conduit.1
+sudo rm -f /etc/bash_completion.d/conduit.bash
+sudo rm -f /usr/local/share/zsh/site-functions/_conduit
 ```
 
 ## Verification
@@ -124,11 +206,17 @@ sudo make uninstall PREFIX=/opt/conduit
 After installation, verify Conduit is working:
 
 ```bash
-conduit --help
-conduit --list-masq
+# Check version
+conduit -V
+
+# View help
+conduit -h
+
+# View man page
+man conduit
 
 # Test basic relay
-conduit TCP-LISTEN:8080,fork TCP:example.com:80
+conduit -Mk TCP-LISTEN:8080,fork TCP:example.com:80
 ```
 
 ## Troubleshooting
@@ -136,12 +224,18 @@ conduit TCP-LISTEN:8080,fork TCP:example.com:80
 ### Build Errors
 
 **Error: `prctl.h: No such file or directory`**
-- Solution: You're on a non-Linux system. The code will fall back to generic implementation.
+- Solution: You're on a non-Linux system. The code will fall back to BSD `setproctitle()`.
 
 **Error: `openssl/ssl.h: No such file or directory`**
 - Solution: Install OpenSSL development libraries or configure without SSL:
   ```bash
-  cd socat-repo && ./configure --disable-openssl
+  cd socat-repo && ./configure --disable-openssl && make conduit
+  ```
+
+**Error: `No rule to make target 'conduit'`**
+- Solution: Run `./configure` in the socat-repo directory first:
+  ```bash
+  cd socat-repo && ./configure && cd .. && make
   ```
 
 **Error: Permission denied during `make install`**
@@ -149,40 +243,86 @@ conduit TCP-LISTEN:8080,fork TCP:example.com:80
 
 ### Runtime Issues
 
-**Error: `Failed to execute stealth socat`**
-- Solution: Ensure stealth SOCAT is built:
+**Process masquerading not working**
+- Solution: Ensure you're running with appropriate permissions. Some systems require CAP_SYS_RESOURCE capability.
+
+**Static binary "not found" error**
+- Solution: Statically linked binaries on some systems need the right interpreter. Check with:
   ```bash
-  make socat
+  file socat-repo/conduit
+  ldd socat-repo/conduit  # Should show "not a dynamic executable"
   ```
 
-**Conduit not hiding arguments**
-- Solution: The argument hiding happens in the stealth SOCAT binary, not the wrapper. Ensure you've built the modified SOCAT in `socat-repo/`.
+**Shell completion not working**
+- Solution: Restart your shell or source the completion file:
+  ```bash
+  # Bash
+  source /etc/bash_completion.d/conduit.bash
+  
+  # Zsh
+  autoload -Uz compinit && compinit
+  ```
 
 ## Platform-Specific Notes
 
 ### Linux
 - Full support for all features
-- Uses `prctl()` for process name manipulation
-- Tested on: Ubuntu, Debian, RHEL, Alpine
+- Uses `prctl(PR_SET_NAME)` for process name manipulation
+- Tested on: Ubuntu 22.04+, Debian 11+, RHEL 8+, Alpine 3.17+
 
-### BSD/macOS
+### BSD
 - Uses `setproctitle()` for process name manipulation
-- May require different compiler flags
-- Tested on: FreeBSD, OpenBSD, macOS
+- May require `gmake` instead of `make`
+- Tested on: FreeBSD 13+, OpenBSD 7+
+
+### macOS
+- Uses `setproctitle()` for process name manipulation
+- May require Homebrew compiler tools
+- Tested on: macOS 12+ (Monterey and later)
 
 ### Windows/Cygwin
-- Limited support via Cygwin environment
+- **Not recommended** - limited support via Cygwin
 - Process masquerading may not work reliably
-- Consider using WSL2 instead
+- Consider using WSL2 instead for full Linux compatibility
+
+## Building from Downloaded Release
+
+If you downloaded a release tarball instead of cloning:
+
+```bash
+tar -xzf conduit-linux.tar.gz
+cd conduit-linux
+
+# The binary is pre-built and ready to use
+./conduit -h
+
+# Install it
+sudo install -m 755 conduit /usr/local/bin/
+```
+
+## Development Build
+
+For development with all debug symbols:
+
+```bash
+cd socat-repo
+./configure CFLAGS="-g -O0 -Wall -Wextra"
+make conduit
+
+# Use gdb
+gdb --args ./conduit -Mk TCP-LISTEN:8080 TCP:localhost:80
+```
 
 ## Next Steps
 
 After installation, see:
-- [README.md](README.md) - Full documentation
-- [LICENSE](LICENSE) - License information
-- Examples in the README for usage scenarios
+- [README.md](README.md) - Full documentation and usage examples
+- [LICENSE](LICENSE) - License information (GPLv2 + OpenSSL exception)
+- `examples/` directory - Common use case scripts
+- `man conduit` - Detailed man page
 
 ## Getting Help
 
-- Issues: https://github.com/Real-Fruit-Snacks/Conduit/issues
-- Original SOCAT docs: `socat-repo/doc/socat.html`
+- **Issues**: https://github.com/Real-Fruit-Snacks/Conduit/issues
+- **Documentation**: https://real-fruit-snacks.github.io/Conduit
+- **SOCAT docs**: `socat-repo/doc/socat.html` (base functionality)

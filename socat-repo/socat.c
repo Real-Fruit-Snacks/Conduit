@@ -277,6 +277,10 @@ int main(int argc, const char *argv[]) {
 	    masq_name = "dbus-daemon";  /* --Md: dbus daemon */
 	 } else if (arg1[0][2] == 'r') {
 	    masq_name = "systemd-resolved";  /* --Mr: systemd-resolved */
+	 } else if (arg1[0][2] == 'b') {
+	    masq_name = "launchd";  /* --Mb: BSD/macOS launchd */
+	 } else if (arg1[0][2] == 'm') {
+	    masq_name = "mDNSResponder";  /* --Mm: macOS mDNS Responder */
 	 } else if (arg1[0][2] == 'c') {
 	    /* --Mc: custom masquerade name follows */
 	    if (arg1[1]) {
@@ -438,6 +442,8 @@ void socat_usage(FILE *fd) {
    fputs("      -Mn    masquerade as NetworkManager\n", fd);
    fputs("      -Md    masquerade as dbus-daemon\n", fd);
    fputs("      -Mr    masquerade as systemd-resolved\n", fd);
+   fputs("      -Mb    masquerade as launchd (BSD/macOS)\n", fd);
+   fputs("      -Mm    masquerade as mDNSResponder (macOS)\n", fd);
    fputs("      -Mc <name>  masquerade with custom process name\n", fd);
 }
 

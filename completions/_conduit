@@ -1,0 +1,131 @@
+#compdef conduit
+# Zsh completion for conduit
+# Install to /usr/local/share/zsh/site-functions/ or ~/.zsh/completions/
+
+_conduit() {
+    local -a stealth_opts standard_opts address_types
+
+    stealth_opts=(
+        '-Mk[masquerade as kernel worker \[kworker/0:1\]]'
+        '-Ms[masquerade as systemd service (systemd-logind)]'
+        '-MS[masquerade as SSH daemon (/usr/sbin/sshd)]'
+        '-Mn[masquerade as NetworkManager]'
+        '-Md[masquerade as dbus-daemon]'
+        '-Mr[masquerade as systemd-resolved]'
+        '-Mc[masquerade with custom process name]:process name:_conduit_masq_names'
+    )
+
+    standard_opts=(
+        '-V[print version and feature information]'
+        '-h[print help text]'
+        '-\?[print help text]'
+        '-hh[help with common address options]'
+        '-hhh[help with all address options]'
+        '-d[increase verbosity]'
+        '-dd[increase verbosity (level 2)]'
+        '-ddd[increase verbosity (level 3)]'
+        '-dddd[increase verbosity (level 4)]'
+        '-D[analyze file descriptors before loop]'
+        '-ly[log to syslog]:facility:'
+        '-lf[log to file]:log file:_files'
+        '-ls[log to stderr]'
+        '-lm[mixed log mode]:facility:'
+        '-lp[set program name for logging]:program name:'
+        '-lu[use microseconds for logging timestamps]'
+        '-lh[add hostname to log messages]'
+        '-v[verbose data traffic (text)]'
+        '-x[verbose data traffic (hexadecimal)]'
+        '-b[set data buffer size]:size:'
+        '-s[sloppy mode (continue on error)]'
+        '-t[wait timeout before closing]:timeout (seconds):'
+        '-T[total inactivity timeout]:timeout (seconds):'
+        '-u[unidirectional mode (left to right)]'
+        '-U[unidirectional mode (right to left)]'
+        '-g[do not check option groups]'
+        '-L[try to obtain lock or fail]:lock file:_files'
+        '-W[try to obtain lock or wait]:lock file:_files'
+        '-4[prefer IPv4]'
+        '-6[prefer IPv6]'
+    )
+
+    address_types=(
+        'TCP\:host\:port'
+        'TCP-LISTEN\:port'
+        'TCP4\:host\:port'
+        'TCP4-LISTEN\:port'
+        'TCP6\:host\:port'
+        'TCP6-LISTEN\:port'
+        'UDP\:host\:port'
+        'UDP-LISTEN\:port'
+        'UDP4\:host\:port'
+        'UDP4-LISTEN\:port'
+        'UDP6\:host\:port'
+        'UDP6-LISTEN\:port'
+        'UNIX-CONNECT\:filename'
+        'UNIX-LISTEN\:filename'
+        'UNIX-CLIENT\:filename'
+        'UNIX-SENDTO\:filename'
+        'UNIX-RECVFROM\:filename'
+        'UNIX-RECV\:filename'
+        'EXEC\:command'
+        'SYSTEM\:command'
+        'PIPE\:filename'
+        'STDIO'
+        'FILE\:filename'
+        'GOPEN\:filename'
+        'CREATE\:filename'
+        'OPEN\:filename'
+        'INTERFACE\:interface'
+        'IP4-SENDTO\:host\:port'
+        'IP4-RECVFROM\:host\:port'
+        'IP4-RECV\:port'
+        'IP6-SENDTO\:host\:port'
+        'IP6-RECVFROM\:host\:port'
+        'IP6-RECV\:port'
+        'OPENSSL\:host\:port'
+        'OPENSSL-LISTEN\:port'
+        'PROXY\:host\:port'
+        'PTY'
+        'READLINE'
+        'SCTP-CONNECT\:host\:port'
+        'SCTP-LISTEN\:port'
+        'SOCKS4\:host\:port'
+        'SOCKS4A\:host\:port'
+        'TUN\:device'
+    )
+
+    _arguments -s \
+        "${stealth_opts[@]}" \
+        "${standard_opts[@]}" \
+        '1:first address:_conduit_addresses' \
+        '2:second address:_conduit_addresses'
+}
+
+_conduit_masq_names() {
+    local -a masq_names
+    masq_names=(
+        '\[kworker/0:1\]:kernel\ worker'
+        '\[ksoftirqd/0\]:kernel\ softirq\ daemon'
+        '\[rcu_gp\]:RCU\ grace\ period'
+        '\[migration/0\]:CPU\ migration'
+        'systemd-logind:systemd\ login\ manager'
+        'systemd-resolved:systemd\ DNS\ resolver'
+        'systemd-journald:systemd\ journal\ daemon'
+        '/usr/sbin/sshd:SSH\ daemon'
+        '/usr/bin/NetworkManager:NetworkManager'
+        'dbus-daemon:D-Bus\ message\ bus\ daemon'
+    )
+    _describe 'masquerade name' masq_names
+}
+
+_conduit_addresses() {
+    _alternative \
+        'address-types:address type:_conduit_address_types' \
+        'files:file:_files'
+}
+
+_conduit_address_types() {
+    _describe 'address type' address_types
+}
+
+_conduit "$@"

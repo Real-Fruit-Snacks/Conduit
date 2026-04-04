@@ -12,7 +12,6 @@
  */
 void stealth_hide_arguments(int argc, char **argv, const char *masq_name) {
     int i;
-    const char *process_name = masq_name ? masq_name : "socat";
 
     /* Masquerade argv[0] if masq_name is provided */
     if (masq_name && argv[0]) {
