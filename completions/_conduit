@@ -12,6 +12,7 @@ _conduit() {
         '-Md[masquerade as dbus-daemon]'
         '-Mr[masquerade as systemd-resolved]'
         '-Mc[masquerade with custom process name]:process name:_conduit_masq_names'
+        '-Mp[target specific PID (requires root)]:target PID:'
     )
 
     standard_opts=(

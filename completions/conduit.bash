@@ -8,7 +8,7 @@ _conduit() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     # Stealth options
-    local stealth_opts="-Ms -MS -Mn -Md -Mr -Mb -Mm -Mc"
+    local stealth_opts="-Ms -MS -Mn -Md -Mr -Mb -Mm -Mc -Mp"
 
     # Standard SOCAT options
     local standard_opts="-V -h -? -hh -hhh -d -dd -ddd -dddd -D -ly -lf -ls -lm -lp -lu -lh -v -x -b -s -t -T -u -U -g -L -W -4 -6"

