@@ -1,0 +1,77 @@
+name: Bug Report
+description: Report a bug in Conduit
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please fill out the information below to help us investigate.
+
+  - type: input
+    id: version
+    attributes:
+      label: Conduit Version
+      description: "Output of `conduit --version` or the release tag"
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / Platform
+      description: "Operating system and architecture"
+      placeholder: "Ubuntu 24.04 x86_64 / Windows 11 / macOS 15 ARM64"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build-profile
+    attributes:
+      label: Build Profile
+      description: "Which feature profile was used to build Conduit?"
+      options:
+        - full (default)
+        - minimal
+        - stealth
+        - custom (describe in steps below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: "Provide the exact steps to reproduce the bug"
+      placeholder: |
+        1. Run `conduit listen -p 4444 --shell`
+        2. Connect from another host with `conduit connect <ip> 4444`
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: "What did you expect to happen?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: "What actually happened?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Output
+      description: "Paste any relevant logs, error messages, or terminal output"
+      render: shell
+    validations:
+      required: false
